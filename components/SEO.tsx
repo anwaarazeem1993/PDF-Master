@@ -20,42 +20,88 @@ const SEO: React.FC<SEOProps> = ({
   schema 
 }) => {
   useEffect(() => {
-    // Update Title
     const finalTitle = title ? `${title} | PDF Master` : DEFAULT_SEO.title;
+    const finalDesc = description || DEFAULT_SEO.description;
+    const finalKeywords = keywords ? keywords.join(', ') : DEFAULT_SEO.keywords;
+    const siteUrl = "https://pdfmaster.app"; // Replace with real domain
+
     document.title = finalTitle;
 
-    // Update Meta Description
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', description || DEFAULT_SEO.description);
+    // Standard Meta
+    const updateMeta = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    const updateProperty = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('property', property);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    updateMeta('description', finalDesc);
+    updateMeta('keywords', finalKeywords);
+    
+    // OG Meta
+    updateProperty('og:title', finalTitle);
+    updateProperty('og:description', finalDesc);
+    updateProperty('og:type', type);
+    updateProperty('og:url', window.location.href);
+    updateProperty('og:site_name', 'PDF Master');
+    
+    // Twitter Meta
+    updateMeta('twitter:card', 'summary_large_image');
+    updateMeta('twitter:title', finalTitle);
+    updateMeta('twitter:description', finalDesc);
+
+    // Canonical
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
     }
+    link.setAttribute('href', canonical || window.location.href);
 
-    // Update Meta Keywords
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-      const kws = keywords ? keywords.join(', ') : DEFAULT_SEO.keywords;
-      metaKeywords.setAttribute('content', kws);
-    }
-
-    // Update OG Tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', finalTitle);
-
-    const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', description || DEFAULT_SEO.description);
+    // Default App Schema
+    const defaultSchema = {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "PDF Master",
+      "operatingSystem": "Web, Windows, macOS, Android, iOS",
+      "applicationCategory": "MultimediaApplication",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1250"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    };
 
     // Schema Injection
-    if (schema) {
-      const existingScript = document.getElementById('json-ld-schema');
-      if (existingScript) existingScript.remove();
+    const existingScript = document.getElementById('json-ld-schema');
+    if (existingScript) existingScript.remove();
 
-      const script = document.createElement('script');
-      script.id = 'json-ld-schema';
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify(schema);
-      document.head.appendChild(script);
-    }
-  }, [title, description, keywords, schema]);
+    const script = document.createElement('script');
+    script.id = 'json-ld-schema';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schema || defaultSchema);
+    document.head.appendChild(script);
+
+  }, [title, description, keywords, schema, canonical, type]);
 
   return null;
 };

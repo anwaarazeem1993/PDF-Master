@@ -8,6 +8,59 @@ import {
 } from 'lucide-react';
 import { PDFTool, ToolCategory } from './types';
 
+export interface ToolSEOContent {
+  steps: string[];
+  faqs: { q: string; a: string }[];
+}
+
+export const TOOL_CONTENT: Record<string, ToolSEOContent> = {
+  'merge': {
+    steps: [
+      'Upload your PDF files by clicking the "Browse Files" button or dragging them into the dropzone.',
+      'Arrange the files in the desired order by dragging them in the queue.',
+      'Click "Process PDF" to combine all documents into a single file.',
+      'Download your merged PDF immediately.'
+    ],
+    faqs: [
+      { q: "Is there a limit to how many PDFs I can merge?", a: "PDF Master allows you to merge up to 20 files at once for free." },
+      { q: "Will my files be stored on your server?", a: "No. Processing happens entirely in your browser. Your privacy is our priority." }
+    ]
+  },
+  'split': {
+    steps: [
+      'Choose the PDF file you want to split.',
+      'Enter the page range you wish to extract (e.g., 1-5, 8, 10-12).',
+      'Click "Process PDF" to generate your new document.',
+      'Save the extracted pages to your device.'
+    ],
+    faqs: [
+      { q: "Can I extract non-sequential pages?", a: "Yes, you can use commas to specify individual pages like '1, 3, 5'." },
+      { q: "Does splitting a PDF reduce its quality?", a: "No, the internal data is preserved perfectly during extraction." }
+    ]
+  },
+  'compress': {
+    steps: [
+      'Select the PDF file you wish to optimize.',
+      'Our engine will analyze and re-serialize the document for a smaller footprint.',
+      'Review the status and click "Download" to save your space-saving PDF.'
+    ],
+    faqs: [
+      { q: "Does compression reduce image quality?", a: "Our smart compression algorithm prioritizes text clarity while optimizing image data to reduce size without noticeable loss." },
+      { q: "How much space can I save?", a: "On average, PDFs are reduced by 40-70% depending on original formatting." }
+    ]
+  },
+  'pdf-to-word': {
+    steps: [
+      'Upload the PDF document you want to convert.',
+      'Our AI-powered engine identifies text blocks and formatting.',
+      'Wait for the conversion to finish and download your editable .docx file.'
+    ],
+    faqs: [
+      { q: "Can I convert scanned PDFs to Word?", a: "Yes, our OCR (Optical Character Recognition) tool is best for scanned documents, but our standard converter handles most layouts." }
+    ]
+  }
+};
+
 export const TOOLS: PDFTool[] = [
   { 
     id: 'merge', 

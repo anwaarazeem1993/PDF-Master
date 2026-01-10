@@ -42,4 +42,6 @@ export interface AdminSettings {
   siteName: string;
   metaDescription: string;
   analyticsId: string;
+  topAdHtml: string;
+  bottomAdHtml: string;
 }

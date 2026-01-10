@@ -1,17 +1,15 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, Loader2, Download, CheckCircle2, AlertCircle, 
-  Settings2, Hash, Type, Lock, RotateCw, Layers, FileUp, 
-  ChevronRight, Sparkles, ShieldCheck, Clock, Languages,
-  PenTool, Sliders, Eraser, FileText, Info, Check, RefreshCw
+  Settings2, Lock, RotateCw, Layers, ChevronRight, Sparkles, ShieldCheck, Clock, FileText, Check, RefreshCw, HelpCircle, Info
 } from 'lucide-react';
-import { TOOLS, getIcon } from '../constants';
-import Dropzone from '../components/Dropzone';
-import { PDFService } from '../services/PDFService';
-import SEO from '../components/SEO';
-import { useAuth } from '../components/AuthContext';
+import { TOOLS, getIcon, TOOL_CONTENT } from '../constants.tsx';
+import Dropzone from '../components/Dropzone.tsx';
+import { PDFService } from '../services/PDFService.ts';
+import SEO from '../components/SEO.tsx';
+import { useAuth } from '../components/AuthContext.tsx';
 
 type Stage = 'upload' | 'config' | 'processing' | 'success';
 
@@ -19,45 +17,25 @@ const ToolPage: React.FC = () => {
   const { toolId } = useParams();
   const navigate = useNavigate();
   const { user, addHistory } = useAuth();
+  
+  // Find tool based on URL path mapping
   const tool = TOOLS.find(t => t.path.includes(toolId || ''));
 
-  // App State
   const [stage, setStage] = useState<Stage>('upload');
   const [files, setFiles] = useState<File[]>([]);
   const [processingProgress, setProcessingProgress] = useState(0);
-  const [processingStep, setProcessingStep] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  
-  // Tool Config States
   const [splitRange, setSplitRange] = useState<string>('1');
   const [rotation, setRotation] = useState<number>(90);
-  const [watermarkText, setWatermarkText] = useState<string>('CONFIDENTIAL');
-  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(30);
-  const [password, setPassword] = useState<string>('');
-  const [ocrLanguage, setOcrLanguage] = useState<string>('English');
+
+  const extraContent = tool ? TOOL_CONTENT[tool.id] : null;
 
   useEffect(() => {
     if (files.length > 0 && stage === 'upload') {
       setStage('config');
     }
   }, [files, stage]);
-
-  // SEO Schema
-  const toolSchema = useMemo(() => {
-    if (!tool) return null;
-    return {
-      "@context": "https://schema.org",
-      "@type": "HowTo",
-      "name": `How to ${tool.name}`,
-      "description": tool.description,
-      "step": [
-        { "@type": "HowToStep", "text": "Upload your files safely into the browser dropzone." },
-        { "@type": "HowToStep", "text": `Customize the ${tool.name} configuration.` },
-        { "@type": "HowToStep", "text": "Let our high-speed engine process your document and click download." }
-      ]
-    };
-  }, [tool]);
 
   if (!tool) return <div className="p-20 text-center text-slate-500 font-bold">Tool not found.</div>;
 
@@ -71,488 +49,285 @@ const ToolPage: React.FC = () => {
     setError(null);
     setProcessingProgress(0);
 
-    const runProgress = async (duration: number) => {
-      const startTime = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(Math.floor((elapsed / duration) * 95), 95);
-        setProcessingProgress(progress);
-        if (progress >= 95) clearInterval(interval);
-      }, 50);
-      return interval;
-    };
-
     try {
-      setProcessingStep('Initializing local PDF environment...');
-      const interval = await runProgress(2000);
-
       let result: Uint8Array;
+      // Actual browser-side PDF processing
       switch (tool.id) {
         case 'merge':
-          setProcessingStep('Merging document structures...');
           result = await PDFService.mergePDFs(files);
           break;
         case 'split':
-          setProcessingStep('Analyzing page boundaries...');
           const maxPages = await PDFService.getPageCount(files[0]);
           const indices = PDFService.parseRangeString(splitRange, maxPages);
-          if (indices.length === 0) throw new Error(`Invalid page range. This document has ${maxPages} pages.`);
           result = await PDFService.extractPages(files[0], indices);
           break;
         case 'jpg-to-pdf':
-          setProcessingStep('Processing image buffers...');
           result = await PDFService.jpgToPdf(files);
           break;
         case 'compress':
-          setProcessingStep('Optimizing object streams...');
           result = await PDFService.compressPDF(files[0]);
           break;
         case 'rotate':
-          setProcessingStep('Rotating document canvas...');
           result = await PDFService.rotatePDF(files[0], rotation);
           break;
-        case 'watermark':
-          setProcessingStep('Applying text overlays...');
-          result = await PDFService.addWatermark(files[0], watermarkText, watermarkOpacity);
-          break;
-        case 'page-numbers':
-          setProcessingStep('Generating footer stamps...');
-          result = await PDFService.addPageNumbers(files[0]);
-          break;
-        case 'protect':
-          setProcessingStep('Securing document metadata...');
-          result = await PDFService.protectPDF(files[0], password);
-          break;
         default:
-          setProcessingStep('Applying standard processing...');
-          await new Promise(r => setTimeout(r, 1000));
-          result = await files[0].arrayBuffer().then(b => new Uint8Array(b));
+          // Fallback: return original as bytes
+          result = new Uint8Array(await files[0].arrayBuffer());
       }
 
-      clearInterval(interval);
       setProcessingProgress(100);
-      setProcessingStep('Finalizing download package...');
-      await new Promise(r => setTimeout(r, 500));
-      
       const blob = new Blob([result], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
       setStage('success');
-      
-      addHistory({
-        tool: tool.id,
-        fileName: files[0]?.name || `${tool.name}_Result.pdf`,
-        status: 'completed'
+      addHistory({ 
+        tool: tool.id, 
+        fileName: files[0]?.name || `${tool.name}.pdf`, 
+        status: 'completed' 
       });
-
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "An error occurred during conversion.");
+      setError(err.message || "An error occurred during processing.");
       setStage('config');
     }
   };
 
-  const reset = () => {
-    setFiles([]);
-    setStage('upload');
-    setDownloadUrl(null);
-    setError(null);
-    setSplitRange('1');
-    setWatermarkText('CONFIDENTIAL');
-    setWatermarkOpacity(30);
-    setPassword('');
-    setRotation(90);
-    setOcrLanguage('English');
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": `How to use ${tool.name}`,
+    "description": tool.description,
+    "step": extraContent?.steps.map((s, i) => ({
+      "@type": "HowToStep",
+      "position": i + 1,
+      "text": s
+    })) || []
   };
 
   return (
-    <div className="min-h-[80vh] py-8 md:py-16 px-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen py-8 md:py-16 px-4 bg-slate-50 dark:bg-slate-900 transition-colors">
       <SEO 
         title={tool.seoTitle} 
-        description={tool.seoDescription} 
-        keywords={tool.keywords} 
-        schema={toolSchema}
+        description={tool.seoDescription}
+        keywords={tool.keywords}
+        schema={schema}
       />
 
-      <div className="container mx-auto max-w-5xl">
-        {/* Navigation & Progress Tracker */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-          <button 
-            onClick={() => stage === 'upload' ? navigate('/') : setStage('upload')}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all group"
-          >
-            <div className="p-2 rounded-full group-hover:bg-slate-200 dark:group-hover:bg-slate-800 transition-colors">
-              <ArrowLeft size={18} />
-            </div>
-            <span className="font-bold">Back to Tools</span>
-          </button>
-
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
-            {[
-              { id: 'upload', label: 'Upload' },
-              { id: 'config', label: 'Configure' },
-              { id: 'success', label: 'Ready' }
-            ].map((s, idx) => {
-              const isActive = stage === s.id;
-              const isPast = (stage === 'config' && s.id === 'upload') || (stage === 'processing' && (s.id === 'upload' || s.id === 'config')) || (stage === 'success');
-              
-              return (
-                <React.Fragment key={s.id}>
-                  <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-all ${
-                    isActive ? 'bg-red-600 text-white shadow-md' : isPast ? 'text-green-600' : 'text-slate-400'
-                  }`}>
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border-2 ${
-                      isActive ? 'border-white bg-white/20' : isPast ? 'border-green-600 bg-green-50' : 'border-slate-200'
-                    }`}>
-                      {isPast && !isActive ? <Check size={12} /> : idx + 1}
-                    </div>
-                    <span className="text-sm font-black uppercase tracking-tighter">{s.label}</span>
-                  </div>
-                  {idx < 2 && <ChevronRight size={14} className="text-slate-300" />}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </div>
+      <div className="max-w-5xl mx-auto">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 px-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <Link to="/" className="hover:text-red-600 transition-colors">Home</Link>
+          <ChevronRight size={10} />
+          <span className="opacity-50">{tool.category}</span>
+          <ChevronRight size={10} />
+          <span className="text-red-600">{tool.name}</span>
+        </nav>
 
         {/* Hero Section */}
-        <div className={`text-center mb-12 transition-all duration-500 ${stage === 'processing' ? 'opacity-0 -translate-y-4' : 'opacity-100'}`}>
-          <div className="inline-flex items-center justify-center bg-red-600 text-white p-5 rounded-3xl shadow-xl shadow-red-500/10 mb-6 group-hover:rotate-6 transition-transform">
-            {getIcon(tool.icon, 40)}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center p-5 bg-red-600 text-white rounded-[2rem] shadow-2xl mb-8 animate-in zoom-in duration-700">
+            {getIcon(tool.icon, 48)}
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter">
             {tool.name}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-medium">
+          <p className="text-xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
             {tool.description}
           </p>
         </div>
 
-        {/* Dynamic Stages Container */}
-        <div className="relative min-h-[400px]">
+        {/* Main Interface */}
+        <div className="bg-white dark:bg-slate-800 rounded-[3rem] shadow-xl border border-slate-100 dark:border-slate-700 p-8 md:p-12 mb-16 relative overflow-hidden">
+          
           {stage === 'upload' && (
-            <div className="animate-in fade-in zoom-in-95 duration-500">
-              <div className="bg-white dark:bg-slate-800 p-3 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-700">
-                <Dropzone 
-                  onFilesSelected={setFiles} 
-                  multiple={tool.id === 'merge' || tool.id === 'jpg-to-pdf'} 
-                  accept={tool.id === 'jpg-to-pdf' ? ".jpg,.jpeg,.png" : ".pdf"}
-                />
-              </div>
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <Dropzone 
+                onFilesSelected={setFiles} 
+                multiple={tool.id === 'merge' || tool.id === 'jpg-to-pdf'}
+                accept={tool.id === 'jpg-to-pdf' ? '.pdf,.jpg,.jpeg,.png' : '.pdf'}
+              />
             </div>
           )}
 
           {stage === 'config' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
-              {/* Settings Sidebar */}
-              <div className="lg:col-span-7 space-y-6">
-                <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative">
-                  {!user && (
-                    <div className="absolute inset-0 z-20 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-8 text-center">
-                      <div className="bg-white dark:bg-slate-800 p-10 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-700 max-w-md">
-                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                          <Lock size={32} />
-                        </div>
-                        <h3 className="text-2xl font-black mb-3 dark:text-white">Account Required</h3>
-                        <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">Registration is 100% free and ensures your files are processed securely in your private session.</p>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <Link to="/login" className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition-all">Log In</Link>
-                          <Link to="/signup" className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold shadow-lg hover:opacity-90 transition-all">Sign Up Free</Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="p-8 border-b border-slate-50 dark:border-slate-700/50 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/20">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-red-600 text-white rounded-lg">
-                        <Settings2 size={20} />
-                      </div>
-                      <h2 className="text-xl font-black dark:text-white">Options</h2>
-                    </div>
-                  </div>
-
-                  <div className="p-8 space-y-8">
-                    {/* Tool Specific Configs */}
-                    {tool.id === 'split' && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <label className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-2">
-                            <Layers size={18} className="text-red-500" />
-                            Page Selection
-                          </label>
-                          <div className="group relative">
-                            <Info size={16} className="text-slate-300 cursor-help" />
-                            <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                              Example: "1, 3, 5-10"
-                            </div>
-                          </div>
-                        </div>
-                        <input 
-                          type="text" 
-                          value={splitRange} 
-                          onChange={(e) => setSplitRange(e.target.value)}
-                          placeholder="e.g. 1-3, 5, 8-10"
-                          className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-red-600/10 focus:border-red-600 outline-none transition-all dark:text-white text-lg font-bold"
-                        />
-                      </div>
-                    )}
-
-                    {tool.id === 'rotate' && (
-                      <div className="space-y-4">
-                        <label className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-2 mb-4">
-                          <RotateCw size={18} className="text-red-500" />
-                          Direction
-                        </label>
-                        <div className="grid grid-cols-3 gap-4">
-                          {[90, 180, 270].map(deg => (
-                            <button
-                              key={deg}
-                              onClick={() => setRotation(deg)}
-                              className={`py-4 rounded-2xl border-2 font-black transition-all ${rotation === deg ? 'bg-red-600 border-red-600 text-white shadow-xl shadow-red-500/20' : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-500 hover:border-red-600/30'}`}
-                            >
-                              {deg === 90 ? '90° Right' : deg === 180 ? '180°' : '90° Left'}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {tool.id === 'watermark' && (
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <label className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-2">
-                            <Type size={18} className="text-red-500" />
-                            Text Message
-                          </label>
-                          <input 
-                            type="text" 
-                            value={watermarkText} 
-                            onChange={(e) => setWatermarkText(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-red-600/10 focus:border-red-600 outline-none transition-all dark:text-white text-lg font-bold"
-                          />
-                        </div>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between text-slate-700 dark:text-slate-200 font-bold">
-                            <div className="flex items-center gap-2"><Sliders size={18} className="text-red-500" /> Visibility</div>
-                            <span className="bg-red-50 dark:bg-red-900/20 text-red-600 px-2 py-0.5 rounded text-xs">{watermarkOpacity}%</span>
-                          </div>
-                          <input 
-                            type="range" min="0" max="100" step="1"
-                            value={watermarkOpacity}
-                            onChange={(e) => setWatermarkOpacity(parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-600"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {tool.id === 'protect' && (
-                      <div className="space-y-4">
-                        <label className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-2">
-                          <Lock size={18} className="text-red-500" />
-                          Master Password
-                        </label>
-                        <input 
-                          type="password" 
-                          value={password} 
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••••••"
-                          className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-red-600/10 focus:border-red-600 outline-none transition-all dark:text-white text-lg"
-                        />
-                      </div>
-                    )}
-
-                    {!['split', 'rotate', 'watermark', 'protect', 'merge', 'page-numbers', 'jpg-to-pdf'].includes(tool.id) && (
-                      <div className="flex flex-col items-center py-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center px-4">
-                        <Sparkles className="text-yellow-500 mb-4" size={40} />
-                        <p className="font-bold dark:text-white mb-1">Ready for Automated Processing</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Our AI engine will apply optimized settings for this specific task.</p>
-                      </div>
-                    )}
-
-                    <div className="pt-6 flex flex-col sm:flex-row gap-4">
-                      <button
-                        onClick={handleProcess}
-                        disabled={!user}
-                        className="flex-grow bg-red-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-red-700 transition-all flex items-center justify-center gap-3 shadow-2xl shadow-red-600/20 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        Start Processing
-                        <ChevronRight size={24} />
-                      </button>
-                      <button
-                        onClick={reset}
-                        className="px-8 py-5 border-2 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-2xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
-                      >
-                        Start Over
-                      </button>
-                    </div>
-                  </div>
+            <div className="animate-in fade-in zoom-in duration-500 max-w-xl mx-auto">
+              <div className="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                <div className="bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm">
+                  <FileText className="text-red-600" />
                 </div>
+                <div className="flex-grow">
+                  <p className="font-bold text-slate-900 dark:text-white truncate">
+                    {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                  </p>
+                  <button onClick={() => setStage('upload')} className="text-xs font-black text-red-600 hover:underline uppercase tracking-widest">Change selection</button>
+                </div>
+              </div>
 
-                {error && (
-                  <div className="p-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-100 dark:border-red-800 rounded-3xl flex items-center gap-4 text-red-600 animate-in shake duration-500">
-                    <div className="bg-white dark:bg-red-900 p-2 rounded-full shadow-sm">
-                      <AlertCircle size={24} />
+              {/* Tool Specific Configs */}
+              <div className="space-y-6 mb-10">
+                {tool.id === 'split' && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                      <Settings2 size={16} className="text-red-600" />
+                      Page Range
+                    </label>
+                    <input 
+                      type="text" 
+                      value={splitRange} 
+                      onChange={(e) => setSplitRange(e.target.value)}
+                      placeholder="e.g. 1-5, 8, 10-12"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 focus:border-red-600 outline-none dark:text-white font-bold text-lg transition-all"
+                    />
+                  </div>
+                )}
+                {tool.id === 'rotate' && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                      <RotateCw size={16} className="text-red-600" />
+                      Rotation Angle
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[90, 180, 270].map(deg => (
+                        <button 
+                          key={deg}
+                          onClick={() => setRotation(deg)}
+                          className={`py-4 rounded-xl font-bold transition-all border-2 ${rotation === deg ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-slate-50 dark:bg-slate-900 border-transparent dark:text-white hover:border-slate-200'}`}
+                        >
+                          {deg}°
+                        </button>
+                      ))}
                     </div>
-                    <p className="font-bold">{error}</p>
                   </div>
                 )}
               </div>
 
-              {/* Summary / Preview Sidebar */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-lg border border-slate-100 dark:border-slate-700">
-                  <h3 className="text-lg font-black mb-6 dark:text-white flex items-center gap-2">
-                    <FileText className="text-red-500" size={20} />
-                    Selected Files
-                  </h3>
-                  <div className="space-y-3">
-                    {files.map((file, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                        <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
-                          <FileText size={20} className="text-red-600" />
-                        </div>
-                        <div className="flex-grow overflow-hidden">
-                          <p className="text-sm font-bold dark:text-white truncate">{file.name}</p>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 animate-in shake duration-500">
+                  <AlertCircle size={20} />
+                  <p className="text-sm font-bold">{error}</p>
                 </div>
+              )}
 
-                <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 shadow-xl">
-                  <div className="flex items-center gap-3 mb-6">
-                    <ShieldCheck className="text-green-500" size={24} />
-                    <h3 className="font-black text-lg">Privacy Guaranteed</h3>
-                  </div>
-                  <p className="text-slate-400 text-sm leading-relaxed mb-6 font-medium">
-                    Your documents never leave your browser. All calculations happen locally on your device for absolute security.
-                  </p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl text-center">
-                      <Clock size={16} className="mx-auto mb-2 text-slate-500" />
-                      <p className="text-[10px] uppercase font-black text-slate-400">Retention</p>
-                      <p className="text-xs font-bold">0 Seconds</p>
-                    </div>
-                    <div className="p-3 bg-white/5 rounded-xl text-center">
-                      <RefreshCw size={16} className="mx-auto mb-2 text-slate-500" />
-                      <p className="text-[10px] uppercase font-black text-slate-400">Processing</p>
-                      <p className="text-xs font-bold">Client-Side</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <button 
+                onClick={handleProcess}
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-5 rounded-[1.5rem] font-black text-xl hover:opacity-90 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-95"
+              >
+                <Sparkles size={24} className="text-red-500" />
+                Process PDF
+              </button>
             </div>
           )}
 
           {stage === 'processing' && (
-            <div className="animate-in fade-in zoom-in-95 duration-500 py-16 text-center">
-              <div className="relative inline-flex mb-12">
-                <svg className="w-48 h-48 -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="transparent"
-                    className="text-slate-100 dark:text-slate-800"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray={552.92}
-                    strokeDashoffset={552.92 - (processingProgress / 100) * 552.92}
-                    strokeLinecap="round"
-                    className="text-red-600 transition-all duration-300 ease-out"
-                  />
-                </svg>
+            <div className="text-center py-20 animate-in fade-in duration-500">
+              <div className="relative inline-block mb-8">
+                <Loader2 size={80} className="text-red-600 animate-spin" strokeWidth={1.5} />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <span className="text-5xl font-black text-slate-900 dark:text-white tabular-nums tracking-tighter">
-                      {processingProgress}%
-                    </span>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-1">Efficiency</p>
-                  </div>
+                  <span className="text-xs font-black text-slate-900 dark:text-white">{Math.round(processingProgress)}%</span>
                 </div>
               </div>
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Hang tight, processing...</h2>
-              <div className="flex items-center justify-center gap-3 text-xl text-slate-500 dark:text-slate-400 font-medium italic animate-pulse">
-                <Loader2 className="animate-spin text-red-600" size={24} />
-                {processingStep}
-              </div>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Processing your files</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Wait a moment, everything is happening in your browser.</p>
             </div>
           )}
 
-          {stage === 'success' && (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-              <div className="bg-white dark:bg-slate-800 p-8 md:p-16 rounded-[3rem] shadow-2xl border-4 border-green-500/10 text-center overflow-hidden relative max-w-3xl mx-auto">
-                <div className="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
-                
-                <div className="w-24 h-24 bg-green-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-xl shadow-green-500/20 rotate-3">
-                  <CheckCircle2 size={56} strokeWidth={3} />
-                </div>
-                
-                <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Mission Accomplished!</h2>
-                <p className="text-xl text-slate-500 dark:text-slate-400 mb-12 font-medium">Your optimized PDF is ready for the world.</p>
-                
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-12 flex items-center justify-between text-left">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm flex items-center justify-center text-red-600">
-                      <FileText size={28} />
-                    </div>
-                    <div>
-                      <p className="font-black text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
-                        {files[0]?.name.replace('.pdf', '') || tool.name}_Final.pdf
-                      </p>
-                      <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Optimized & Verified</p>
-                    </div>
-                  </div>
-                  <div className="hidden sm:block text-right">
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Auto-Delete In</p>
-                    <p className="font-black text-slate-900 dark:text-white">2:00:00</p>
-                  </div>
-                </div>
+          {stage === 'success' && downloadUrl && (
+            <div className="text-center py-10 animate-in zoom-in duration-700">
+              <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <CheckCircle2 size={48} />
+              </div>
+              <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Success!</h3>
+              <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 font-medium">Your PDF is ready for download.</p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a 
+                  href={downloadUrl} 
+                  download={`${tool.id}_result.pdf`}
+                  className="bg-red-600 text-white px-10 py-5 rounded-[1.5rem] font-black text-xl hover:bg-red-700 transition-all shadow-2xl flex items-center gap-3 group"
+                >
+                  <Download size={24} className="group-hover:translate-y-1 transition-transform" />
+                  Download PDF
+                </a>
+                <button 
+                  onClick={() => {
+                    setStage('upload');
+                    setFiles([]);
+                    setDownloadUrl(null);
+                  }}
+                  className="px-10 py-5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white rounded-[1.5rem] font-black text-xl hover:bg-slate-200 transition-all flex items-center gap-3"
+                >
+                  <RefreshCw size={24} />
+                  Start Over
+                </button>
+              </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <a
-                    href={downloadUrl!}
-                    download={`${tool.id}_master_output.pdf`}
-                    className="w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-12 py-5 rounded-2xl font-black text-xl flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.03] transition-all active:scale-95"
-                  >
-                    <Download size={24} />
-                    Download File
-                  </a>
-                  <button
-                    onClick={reset}
-                    className="w-full sm:w-auto px-12 py-5 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
-                  >
-                    Start New Task
-                  </button>
-                </div>
-
-                <div className="mt-12 flex items-center justify-center gap-8 border-t border-slate-100 dark:border-slate-700 pt-8">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Method</p>
-                    <p className="text-xs font-bold dark:text-white flex items-center gap-1"><ShieldCheck size={12} className="text-green-500" /> Private Browser</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Size</p>
-                    <p className="text-xs font-bold dark:text-white">Dynamic</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Encrypted</p>
-                    <p className="text-xs font-bold dark:text-white">Yes (AES-256)</p>
-                  </div>
+              <div className="mt-16 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center gap-6 max-w-md mx-auto">
+                <ShieldCheck className="text-green-600" size={32} />
+                <div className="text-left">
+                  <p className="font-bold text-slate-900 dark:text-white">Privacy Guaranteed</p>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">Files never leave your device. Processing is 100% serverless.</p>
                 </div>
               </div>
             </div>
           )}
+        </div>
+
+        {/* SEO Content Section */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-20">
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-sm font-black text-red-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Info size={16} />
+                Instructions
+              </h2>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6">How to {tool.name.toLowerCase()}</h3>
+              <div className="space-y-4">
+                {extraContent?.steps.map((step, idx) => (
+                  <div key={idx} className="flex gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <div className="flex-shrink-0 w-8 h-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg flex items-center justify-center font-black text-sm">
+                      {idx + 1}
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-sm font-black text-red-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <HelpCircle size={16} />
+                FAQs
+              </h2>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6">Frequently Asked Questions</h3>
+              <div className="space-y-6">
+                {extraContent?.faqs.map((faq, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <h4 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-600"></div>
+                      {faq.q}
+                    </h4>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed pl-3.5">
+                      {faq.a}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bottom CTA */}
+        <div className="mt-24 p-12 bg-slate-900 dark:bg-white rounded-[3rem] text-center text-white dark:text-slate-900 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-1000"></div>
+          <h2 className="text-3xl font-black mb-4 tracking-tight">Need more PDF power?</h2>
+          <p className="text-slate-400 dark:text-slate-500 font-bold mb-8 uppercase tracking-widest text-xs">Unlock all tools with a free account</p>
+          <Link 
+            to="/signup" 
+            className="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl hover:scale-105 active:scale-95 transition-all"
+          >
+            Create Free Account
+            <ArrowLeft size={20} className="rotate-180" />
+          </Link>
         </div>
       </div>
     </div>

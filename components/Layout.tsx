@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Sun, Moon, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
-import { useAuth } from './AuthContext';
-import { TOOLS, getIcon } from '../constants';
-import { ToolCategory } from '../types';
+import { useAuth } from './AuthContext.tsx';
+import { TOOLS, getIcon } from '../constants.tsx';
+import { ToolCategory } from '../types.ts';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Site settings from Admin
+  const [siteConfig, setSiteConfig] = useState({
+    adsEnabled: true,
+    topAdHtml: "",
+    bottomAdHtml: ""
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_settings');
+    if (saved) setSiteConfig(JSON.parse(saved));
+  }, [location]);
 
   useEffect(() => {
     if (darkMode) {
@@ -27,18 +38,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [darkMode]);
 
-  // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setToolsMenuOpen(false);
   }, [location]);
 
-  // Group tools by category
   const categories = Object.values(ToolCategory);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      {/* Header */}
       <header className="sticky top-0 z-50 glass-panel border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -61,7 +69,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <ChevronDown size={16} className={`transition-transform duration-300 ${toolsMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Mega Menu */}
               {toolsMenuOpen && (
                 <div className="absolute top-full -left-48 w-[800px] animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8 mt-2 grid grid-cols-3 gap-8 overflow-hidden">
@@ -142,26 +149,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      {/* AdSense Top Placeholder */}
-      <div className="w-full py-4 bg-slate-100 dark:bg-slate-800/50 flex justify-center border-b border-slate-200 dark:border-slate-800">
-        <div className="w-full max-w-4xl h-24 bg-slate-200 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
-          AdSpace - Leaderboard
+      {/* Top Ad Placement */}
+      {siteConfig.adsEnabled && siteConfig.topAdHtml && (
+        <div className="container mx-auto px-4 mt-6 flex justify-center overflow-hidden">
+          <div dangerouslySetInnerHTML={{ __html: siteConfig.topAdHtml }} />
         </div>
-      </div>
+      )}
 
-      {/* Main Content */}
       <main className="flex-grow">
         {children}
       </main>
 
-      {/* AdSense Bottom Placeholder */}
-      <div className="w-full py-4 bg-slate-100 dark:bg-slate-800/50 flex justify-center border-t border-slate-200 dark:border-slate-800">
-        <div className="w-full max-w-4xl h-32 bg-slate-200 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
-          AdSpace - Footer Banner
+      {/* Bottom Ad Placement */}
+      {siteConfig.adsEnabled && siteConfig.bottomAdHtml && (
+        <div className="container mx-auto px-4 mb-8 flex justify-center overflow-hidden">
+          <div dangerouslySetInnerHTML={{ __html: siteConfig.bottomAdHtml }} />
         </div>
-      </div>
+      )}
 
-      {/* Footer */}
       <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -175,15 +180,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                 The most advanced client-side PDF suite. Process documents privately and securely directly in your browser.
               </p>
-              <div className="flex gap-4">
-                {/* Social placeholders */}
-                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
-                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
-                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
-              </div>
             </div>
-            
-            {/* Quick Links Column - Dynamically generated from categories */}
             {categories.slice(0, 3).map((category) => (
               <div key={category}>
                 <h4 className="font-black text-slate-900 dark:text-white mb-6 uppercase tracking-widest text-[10px]">
@@ -199,78 +196,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             ))}
           </div>
-          
           <div className="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-slate-500 font-bold uppercase tracking-widest">
             <p>© 2024 PDF Master. Engineered for Privacy.</p>
-            <div className="flex gap-8">
-              <a href="#" className="hover:text-red-600 transition-colors">Privacy</a>
-              <a href="#" className="hover:text-red-600 transition-colors">Terms</a>
-              <a href="#" className="hover:text-red-600 transition-colors">API</a>
-              <a href="#" className="hover:text-red-600 transition-colors">Contact</a>
-            </div>
           </div>
         </div>
       </footer>
-
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] bg-white dark:bg-slate-950 animate-in fade-in slide-in-from-right duration-300">
-          <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 mb-6">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white">
-                <span className="font-black italic">PM</span>
-              </div>
-              <span className="font-black dark:text-white">PDF Master</span>
-            </Link>
-            <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-500">
-              <X size={28} />
-            </button>
-          </div>
-          
-          <nav className="px-6 h-[calc(100vh-100px)] overflow-y-auto pb-20 space-y-8">
-            {categories.map((category) => (
-              <div key={category} className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                  {category}
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {TOOLS.filter(t => t.category === category && t.enabled).map((tool) => (
-                    <Link 
-                      key={tool.id}
-                      to={tool.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl"
-                    >
-                      <div className="text-red-600">
-                        {getIcon(tool.icon, 16)}
-                      </div>
-                      <span className="text-xs font-bold dark:text-white">{tool.name}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-            
-            <div className="pt-8 border-t border-slate-100 dark:border-slate-800 space-y-4">
-              {user ? (
-                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 bg-red-600 text-white py-4 rounded-2xl font-black">
-                   <LayoutDashboard size={20} />
-                   Dashboard
-                 </Link>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center py-4 bg-slate-100 dark:bg-slate-900 rounded-2xl font-black text-slate-900 dark:text-white">
-                    Login
-                  </Link>
-                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center py-4 bg-red-600 rounded-2xl font-black text-white">
-                    Sign Up Free
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
     </div>
   );
 };
