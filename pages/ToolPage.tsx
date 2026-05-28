@@ -103,6 +103,9 @@ const ToolPage: React.FC = () => {
         case 'rotate':
           result = await PDFService.rotatePDF(files[0], rotation);
           break;
+        case 'remove-watermark':
+          result = await PDFService.removeWatermark(files[0]);
+          break;
         default:
           // Fallback: return original as bytes
           result = new Uint8Array(await files[0].arrayBuffer());

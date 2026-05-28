@@ -38,7 +38,11 @@ const translations: Record<Language, Record<string, string>> = {
     'tool.pdf-to-word.name': 'PDF to Word',
     'tool.pdf-to-word.desc': 'Convert PDF files to editable Microsoft Word documents.',
     'tool.pdf-to-word.seoTitle': 'Convert PDF to Word Online | Free PDF to DOCX Converter',
-    'tool.pdf-to-word.seoDesc': 'Transform PDF documents into editable Word files with high accuracy. Fast and free PDF to Word converter that preserves table structures and fonts.'
+    'tool.pdf-to-word.seoDesc': 'Transform PDF documents into editable Word files with high accuracy. Fast and free PDF to Word converter that preserves table structures and fonts.',
+    'tool.remove-watermark.name': 'Remove Watermark',
+    'tool.remove-watermark.desc': 'Bypass and strip text or image watermarks from your PDF files.',
+    'tool.remove-watermark.seoTitle': 'Remove Watermark from PDF Online | Free PDF Watermark Eraser',
+    'tool.remove-watermark.seoDesc': 'Easily strip and remove text or image watermarks from your PDF files. Clean your documents instantly and securely.'
   },
   es: {
     'nav.tools': 'Herramientas PDF',

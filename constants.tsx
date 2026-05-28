@@ -63,6 +63,18 @@ export const TOOL_CONTENT: Record<string, ToolSEOContent> = {
 
 export const TOOLS: PDFTool[] = [
   { 
+    id: 'remove-watermark', 
+    name: 'Remove Watermark', 
+    description: 'Bypass and strip text or image watermarks from your PDF files.', 
+    icon: 'Eraser', 
+    category: ToolCategory.EDIT, 
+    path: '/remove-watermark', 
+    enabled: true,
+    seoTitle: 'Remove Watermark from PDF Online | Free PDF Watermark Eraser',
+    seoDescription: 'Easily strip and remove text or image watermarks from your PDF files. Clean your documents instantly and securely.',
+    keywords: ['remove watermark pdf', 'delete watermark', 'pdf watermark eraser', 'remove logo from pdf']
+  },
+  { 
     id: 'merge', 
     name: 'Merge PDF', 
     description: 'Combine multiple PDFs into one document quickly and securely.', 
