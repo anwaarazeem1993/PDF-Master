@@ -3,5 +3,6 @@
   "description": "A high-performance, SEO-optimized PDF management suite with tools for merging, splitting, compressing, and converting PDFs, featuring an admin panel and AdSense integration.",
   "requestFramePermissions": [
     "camera"
-  ]
+  ],
+  "majorCapabilities": []
 }

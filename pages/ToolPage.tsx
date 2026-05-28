@@ -28,6 +28,7 @@ const ToolPage: React.FC = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [splitRange, setSplitRange] = useState<string>('1');
   const [rotation, setRotation] = useState<number>(90);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const extraContent = tool ? TOOL_CONTENT[tool.id] : null;
 
@@ -36,6 +37,19 @@ const ToolPage: React.FC = () => {
       setStage('config');
     }
   }, [files, stage]);
+
+  useEffect(() => {
+    if (files.length > 0) {
+      if (files[0].type === 'application/pdf' || files[0].type.startsWith('image/')) {
+        const url = URL.createObjectURL(files[0]);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+      }
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [files]);
+
 
   if (!tool) return <div className="p-20 text-center text-slate-500 font-bold">Tool not found.</div>;
 
@@ -149,6 +163,20 @@ const ToolPage: React.FC = () => {
 
           {stage === 'config' && (
             <div className="animate-in fade-in zoom-in duration-500 max-w-xl mx-auto">
+              {previewUrl && (
+                <div className="mb-8 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-[1/1.3] shadow-inner relative group">
+                  {files[0].type === 'application/pdf' ? (
+                    <embed src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`} type="application/pdf" className="w-full h-full object-contain pointer-events-none" />
+                  ) : (
+                    <img src={previewUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
+                  )}
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
+                  <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Document Preview</span>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <div className="bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm">
                   <FileText className="text-red-600" />
