@@ -13,6 +13,7 @@ import { useAuth } from '../components/AuthContext.tsx';
 
 import Breadcrumb from '../components/Breadcrumb.tsx';
 import PdfCanvasPreview from '../components/PdfCanvasPreview.tsx';
+import PdfPageOrganizer from '../components/PdfPageOrganizer.tsx';
 import { useI18n } from '../components/I18nContext.tsx';
 
 type Stage = 'upload' | 'config' | 'processing' | 'success';
@@ -72,7 +73,7 @@ const ToolPage: React.FC = () => {
 
   if (!tool) return <div className="p-20 text-center text-slate-500 font-bold">Tool not found.</div>;
 
-  const handleProcess = async () => {
+  const handleProcess = async (organizePages?: any[]) => {
     if (!user) {
       setError("Please log in to process files. It's 100% free!");
       return;
@@ -105,6 +106,12 @@ const ToolPage: React.FC = () => {
           break;
         case 'remove-watermark':
           result = await PDFService.removeWatermark(files[0]);
+          break;
+        case 'organize':
+          if (!organizePages) {
+            throw new Error("No page configuration provided.");
+          }
+          result = await PDFService.organizePDF(files[0], organizePages);
           break;
         default:
           // Fallback: return original as bytes
@@ -187,86 +194,99 @@ const ToolPage: React.FC = () => {
           )}
 
           {stage === 'config' && (
-            <div className="animate-in fade-in zoom-in duration-500 max-w-xl mx-auto">
-              {previewUrl && (
-                <div className="mb-8 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-[1/1.3] shadow-inner relative group">
-                  {files[0].type === 'application/pdf' ? (
-                    <PdfCanvasPreview fileUrl={previewUrl} className="w-full h-full" />
-                  ) : (
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
-                  )}
-                  <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
-                  <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Document Preview</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                <div className="bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm">
-                  <FileText className="text-red-600" />
-                </div>
-                <div className="flex-grow">
-                  <p className="font-bold text-slate-900 dark:text-white truncate">
-                    {files.length} {files.length === 1 ? 'file' : 'files'} selected
-                  </p>
-                  <button onClick={() => setStage('upload')} className="text-xs font-black text-red-600 hover:underline uppercase tracking-widest">Change selection</button>
-                </div>
-              </div>
-
-              {/* Tool Specific Configs */}
-              <div className="space-y-6 mb-10">
-                {tool.id === 'split' && (
-                  <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                      <Settings2 size={16} className="text-red-600" />
-                      Page Range
-                    </label>
-                    <input 
-                      type="text" 
-                      value={splitRange} 
-                      onChange={(e) => setSplitRange(e.target.value)}
-                      placeholder="e.g. 1-5, 8, 10-12"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 focus:border-red-600 outline-none dark:text-white font-bold text-lg transition-all"
-                    />
-                  </div>
-                )}
-                {tool.id === 'rotate' && (
-                  <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                      <RotateCw size={16} className="text-red-600" />
-                      Rotation Angle
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[90, 180, 270].map(deg => (
-                        <button 
-                          key={deg}
-                          onClick={() => setRotation(deg)}
-                          className={`py-4 rounded-xl font-bold transition-all border-2 ${rotation === deg ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-slate-50 dark:bg-slate-900 border-transparent dark:text-white hover:border-slate-200'}`}
-                        >
-                          {deg}°
-                        </button>
-                      ))}
+            tool.id === 'organize' ? (
+              <PdfPageOrganizer 
+                file={files[0]} 
+                onCancel={() => {
+                  setStage('upload');
+                  setFiles([]);
+                }}
+                onProcess={(pagesArray) => {
+                  handleProcess(pagesArray);
+                }}
+              />
+            ) : (
+              <div className="animate-in fade-in zoom-in duration-500 max-w-xl mx-auto">
+                {previewUrl && (
+                  <div className="mb-8 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-[1/1.3] shadow-inner relative group">
+                    {files[0].type === 'application/pdf' ? (
+                      <PdfCanvasPreview fileUrl={previewUrl} className="w-full h-full" />
+                    ) : (
+                      <img src={previewUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
+                    )}
+                    <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
+                    <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Document Preview</span>
                     </div>
                   </div>
                 )}
-              </div>
 
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 animate-in shake duration-500">
-                  <AlertCircle size={20} />
-                  <p className="text-sm font-bold">{error}</p>
+                <div className="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                  <div className="bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm">
+                    <FileText className="text-red-600" />
+                  </div>
+                  <div className="flex-grow">
+                    <p className="font-bold text-slate-900 dark:text-white truncate">
+                      {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                    </p>
+                    <button onClick={() => setStage('upload')} className="text-xs font-black text-red-600 hover:underline uppercase tracking-widest">Change selection</button>
+                  </div>
                 </div>
-              )}
 
-              <button 
-                onClick={handleProcess}
-                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-5 rounded-[1.5rem] font-black text-xl hover:opacity-90 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-95"
-              >
-                <Sparkles size={24} className="text-red-500" />
-                Process PDF
-              </button>
-            </div>
+                {/* Tool Specific Configs */}
+                <div className="space-y-6 mb-10">
+                  {tool.id === 'split' && (
+                    <div className="space-y-3">
+                      <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <Settings2 size={16} className="text-red-600" />
+                        Page Range
+                      </label>
+                      <input 
+                        type="text" 
+                        value={splitRange} 
+                        onChange={(e) => setSplitRange(e.target.value)}
+                        placeholder="e.g. 1-5, 8, 10-12"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 focus:border-red-600 outline-none dark:text-white font-bold text-lg transition-all"
+                      />
+                    </div>
+                  )}
+                  {tool.id === 'rotate' && (
+                    <div className="space-y-3">
+                      <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <RotateCw size={16} className="text-red-600" />
+                        Rotation Angle
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {[90, 180, 270].map(deg => (
+                          <button 
+                            key={deg}
+                            onClick={() => setRotation(deg)}
+                            className={`py-4 rounded-xl font-bold transition-all border-2 ${rotation === deg ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-slate-50 dark:bg-slate-900 border-transparent dark:text-white hover:border-slate-200'}`}
+                          >
+                            {deg}°
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {error && (
+                  <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 animate-in shake duration-500">
+                    <AlertCircle size={20} />
+                    <p className="text-sm font-bold">{error}</p>
+                  </div>
+                )}
+
+                <button 
+                  onClick={() => handleProcess()}
+                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-5 rounded-[1.5rem] font-black text-xl hover:opacity-90 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-95"
+                >
+                  <Sparkles size={24} className="text-red-500" />
+                  Process PDF
+                </button>
+              </div>
+            )
           )}
 
           {stage === 'processing' && (

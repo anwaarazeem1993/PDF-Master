@@ -18,7 +18,19 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { TOOLS, getIcon } from '../constants';
 import { ArrowRight, Play, Plus, X } from 'lucide-react';
-import { PDFTool } from '../types';
+import { PDFTool, ToolCategory } from '../types';
+
+const getCategoryColor = (category: ToolCategory) => {
+  switch (category) {
+    case ToolCategory.ORGANIZE: return 'text-blue-500';
+    case ToolCategory.OPTIMIZE: return 'text-green-500';
+    case ToolCategory.CONVERT_FROM: return 'text-purple-500';
+    case ToolCategory.CONVERT_TO: return 'text-indigo-500';
+    case ToolCategory.EDIT: return 'text-red-500';
+    case ToolCategory.SECURITY: return 'text-amber-500';
+    default: return 'text-slate-500';
+  }
+};
 
 interface SortableToolItemProps {
   id: string;
@@ -46,11 +58,11 @@ const SortableToolItem: React.FC<SortableToolItemProps> = ({ id, tool, onRemove,
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative group flex flex-col items-center gap-2 p-4 bg-white dark:bg-slate-800 rounded-2xl border-2 \${isOverlay ? 'border-red-500 shadow-xl scale-105' : 'border-slate-200 dark:border-slate-700 shadow-sm'} w-32`}
+      className={`relative group flex flex-col items-center gap-2 p-4 bg-white dark:bg-slate-800 rounded-2xl border-2 ${isOverlay ? 'border-red-500 shadow-xl scale-105' : 'border-slate-200 dark:border-slate-700 shadow-sm'} w-32`}
       {...attributes}
       {...listeners}
     >
-      <div className="text-red-500">
+      <div className={`${getCategoryColor(tool.category)}`}>
         {getIcon(tool.icon, 32)}
       </div>
       <span className="text-xs font-bold text-center text-slate-700 dark:text-slate-300">
@@ -139,9 +151,9 @@ export const WorkflowBuilder: React.FC = () => {
               <button
                 key={tool.id}
                 onClick={() => addTool(tool.id)}
-                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:border-red-500 hover:text-red-500 transition-colors flex-grow lg:w-full"
+                className={`flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:border-red-500 hover:text-red-500 transition-colors flex-grow lg:w-full group`}
               >
-                <div className="text-red-500">
+                <div className={`${getCategoryColor(tool.category)} group-hover:text-red-500`}>
                   {getIcon(tool.icon, 16)}
                 </div>
                 {tool.name}

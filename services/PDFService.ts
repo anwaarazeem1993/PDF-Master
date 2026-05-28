@@ -209,4 +209,30 @@ export class PDFService {
       return 0;
     }
   }
+
+  /**
+   * Organizes, duplicates, reorders, rotates or inserts blank pages visually.
+   */
+  static async organizePDF(file: File, pages: { pageNum: number; rotation: number }[]): Promise<Uint8Array> {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const newPdf = await PDFDocument.create();
+
+    for (const pageConfig of pages) {
+      if (pageConfig.pageNum === -1) {
+        // Add a blank page (A4 dims, standard StandardFonts, etc.)
+        newPdf.addPage([595, 842]);
+      } else {
+        const copied = await newPdf.copyPages(pdfDoc, [pageConfig.pageNum - 1]);
+        const page = copied[0];
+        if (pageConfig.rotation !== 0) {
+          const currentRotation = page.getRotation().angle;
+          page.setRotation(degrees(currentRotation + pageConfig.rotation));
+        }
+        newPdf.addPage(page);
+      }
+    }
+
+    return await newPdf.save();
+  }
 }

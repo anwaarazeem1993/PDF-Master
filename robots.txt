@@ -4,4 +4,4 @@ Allow: /
 Disallow: /admin
 Disallow: /dashboard
 
-Sitemap: https://pdfmaster.app/sitemap.xml
+Sitemap: https://onepdfmaster.vercel.app/sitemap.xml

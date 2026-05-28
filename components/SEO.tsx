@@ -23,7 +23,7 @@ const SEO: React.FC<SEOProps> = ({
     const finalTitle = title ? `${title} | PDF Master` : DEFAULT_SEO.title;
     const finalDesc = description || DEFAULT_SEO.description;
     const finalKeywords = keywords ? keywords.join(', ') : DEFAULT_SEO.keywords;
-    const siteUrl = "https://pdfmaster.app"; // Replace with real domain
+    const siteUrl = "https://onepdfmaster.vercel.app"; // Replaced with real domain
 
     document.title = finalTitle;
 
