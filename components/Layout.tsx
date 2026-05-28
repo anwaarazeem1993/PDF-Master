@@ -5,6 +5,7 @@ import { Menu, X, Sun, Moon, Settings, LayoutDashboard, ChevronDown } from 'luci
 import { useAuth } from './AuthContext.tsx';
 import { TOOLS, getIcon } from '../constants.tsx';
 import { ToolCategory } from '../types.ts';
+import Breadcrumb from './Breadcrumb.tsx';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -44,6 +45,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [location]);
 
   const categories = Object.values(ToolCategory);
+
+  const getBreadcrumbs = () => {
+    const path = location.pathname;
+    if (path === '/') return null;
+    
+    const pathName = path.startsWith('/') ? path.substring(1) : path;
+    const isTool = TOOLS.some(t => t.path === path);
+    // Tool pages handle their own breadcrumbs for layout reasons
+    if (isTool) return null;
+    
+    const capitalized = pathName.charAt(0).toUpperCase() + pathName.slice(1);
+    return [{ label: capitalized }];
+  };
+
+  const breadcrumbs = getBreadcrumbs();
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -157,6 +173,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       <main className="flex-grow">
+        {breadcrumbs && (
+          <div className="container mx-auto px-4 mt-8">
+            <Breadcrumb items={breadcrumbs} />
+          </div>
+        )}
         {children}
       </main>
 

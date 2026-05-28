@@ -15,6 +15,14 @@ const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'All'>('All');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const categories = ['All', ...Object.values(ToolCategory)];
 
@@ -113,11 +121,24 @@ const Home: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredTools.length > 0 ? (
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, index) => (
+              <div 
+                key={index}
+                className="tool-card group relative bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col items-start animate-pulse"
+              >
+                <div className="bg-slate-200 dark:bg-slate-700 w-16 h-16 rounded-2xl mb-8"></div>
+                <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-4"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-full mb-2"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-5/6 mb-6"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-1/3 mt-auto"></div>
+              </div>
+            ))
+          ) : filteredTools.length > 0 ? (
             filteredTools.map((tool) => (
               <Link 
                 key={tool.id} to={tool.path}
-                className="group relative bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-start"
+                className="tool-card group relative bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-start"
               >
                 <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl mb-8 text-slate-400 group-hover:bg-red-600 group-hover:text-white group-hover:rotate-6 transition-all duration-300">
                   {getIcon(tool.icon, 32)}

@@ -20,7 +20,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
   onFilesSelected, 
   multiple = true, 
   accept = ".pdf",
-  maxSizeMB = 50
+  maxSizeMB = 500
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [filesWithProgress, setFilesWithProgress] = useState<FileWithProgress[]>([]);

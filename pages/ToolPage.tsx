@@ -11,6 +11,8 @@ import { PDFService } from '../services/PDFService.ts';
 import SEO from '../components/SEO.tsx';
 import { useAuth } from '../components/AuthContext.tsx';
 
+import Breadcrumb from '../components/Breadcrumb.tsx';
+
 type Stage = 'upload' | 'config' | 'processing' | 'success';
 
 const ToolPage: React.FC = () => {
@@ -127,13 +129,10 @@ const ToolPage: React.FC = () => {
 
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 px-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <Link to="/" className="hover:text-red-600 transition-colors">Home</Link>
-          <ChevronRight size={10} />
-          <span className="opacity-50">{tool.category}</span>
-          <ChevronRight size={10} />
-          <span className="text-red-600">{tool.name}</span>
-        </nav>
+        <Breadcrumb items={[
+          { label: tool.category },
+          { label: tool.name }
+        ]} />
 
         {/* Hero Section */}
         <div className="text-center mb-12">
