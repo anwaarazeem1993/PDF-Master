@@ -8,6 +8,8 @@ interface AuthContextType {
   signup: (name: string, email: string, pass: string) => Promise<void>;
   logout: () => void;
   addHistory: (item: Omit<FileHistory, 'id' | 'timestamp'>) => void;
+  removeHistory: (id: string) => void;
+  clearHistory: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,8 +86,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const removeHistory = (id: string) => {
+    if (!user) return;
+    const updatedUser = { ...user, history: user.history.filter(item => item.id !== id) };
+    setUser(updatedUser);
+    localStorage.setItem('pdf_user', JSON.stringify(updatedUser));
+    
+    // Sync with registered users store
+    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
+    const idx = users.findIndex((u: any) => u.id === user.id);
+    if (idx !== -1) {
+      users[idx].history = updatedUser.history;
+      localStorage.setItem('registered_users', JSON.stringify(users));
+    }
+  };
+
+  const clearHistory = () => {
+    if (!user) return;
+    const updatedUser = { ...user, history: [] };
+    setUser(updatedUser);
+    localStorage.setItem('pdf_user', JSON.stringify(updatedUser));
+    
+    // Sync with registered users store
+    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
+    const idx = users.findIndex((u: any) => u.id === user.id);
+    if (idx !== -1) {
+      users[idx].history = [];
+      localStorage.setItem('registered_users', JSON.stringify(users));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, addHistory }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, addHistory, removeHistory, clearHistory }}>
       {children}
     </AuthContext.Provider>
   );

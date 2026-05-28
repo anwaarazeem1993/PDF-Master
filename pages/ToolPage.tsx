@@ -48,9 +48,25 @@ const ToolPage: React.FC = () => {
   const [splitRange, setSplitRange] = useState<string>('1');
   const [rotation, setRotation] = useState<number>(90);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [watermarkText, setWatermarkText] = useState<string>('CONFIDENTIAL');
+  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(30);
+  const [pdfPassword, setPdfPassword] = useState<string>('');
 
   const extraContent = tool ? TOOL_CONTENT[tool.id] : null;
   const outputConfig = tool ? getOutputConfig(tool.id) : getOutputConfig('default');
+
+  const stepsList = extraContent?.steps || [
+    `Upload your PDF or source document using our secure client-side drag-and-drop zone.`,
+    `Personalize options and apply desired parameters inside the configuration workbench.`,
+    `Click "Process PDF" to trigger our serverless document processing engine.`,
+    `Download your updated document directly. All file bytes are processed entirely locally.`
+  ];
+  
+  const faqsList = extraContent?.faqs || [
+    { q: `How does the browser-side ${tool.name} tool run?`, a: `Our advanced PDF engine loads the document into your browser memory using virtual local resources, making modifications entirely client-side without upload latency.` },
+    { q: "Is my personal data safe with this converter?", a: "100% yes. All operations are processed micro-serverlessly directly within your browser window. Neither files nor conversion records ever persist outside of your browser context." },
+    { q: `Are there limits to how often I can use ${tool.name}?`, a: "No. You can leverage all tools fully for unlimited sessions, entirely free, securely, and with zero ads." }
+  ];
 
   useEffect(() => {
     if (files.length > 0 && stage === 'upload') {
@@ -106,6 +122,18 @@ const ToolPage: React.FC = () => {
           break;
         case 'remove-watermark':
           result = await PDFService.removeWatermark(files[0]);
+          break;
+        case 'watermark':
+          result = await PDFService.addWatermark(files[0], watermarkText, watermarkOpacity);
+          break;
+        case 'page-numbers':
+          result = await PDFService.addPageNumbers(files[0]);
+          break;
+        case 'protect':
+          if (!pdfPassword) {
+            throw new Error("Please provide a password to protect the PDF.");
+          }
+          result = await PDFService.protectPDF(files[0], pdfPassword);
           break;
         case 'organize':
           if (!organizePages) {
@@ -234,7 +262,7 @@ const ToolPage: React.FC = () => {
                 </div>
 
                 {/* Tool Specific Configs */}
-                <div className="space-y-6 mb-10">
+                <div className="space-y-6 mb-10 font-sans">
                   {tool.id === 'split' && (
                     <div className="space-y-3">
                       <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
@@ -266,6 +294,62 @@ const ToolPage: React.FC = () => {
                             {deg}°
                           </button>
                         ))}
+                      </div>
+                    </div>
+                  )}
+                  {tool.id === 'watermark' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                          <Settings2 size={16} className="text-red-600" />
+                          Watermark Text
+                        </label>
+                        <input 
+                          type="text" 
+                          value={watermarkText} 
+                          onChange={(e) => setWatermarkText(e.target.value)}
+                          placeholder="e.g. STRICTLY CONFIDENTIAL"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 focus:border-red-600 outline-none dark:text-white font-bold text-lg transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                            Watermark Opacity ({watermarkOpacity}%)
+                          </label>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="5" 
+                          max="95" 
+                          value={watermarkOpacity} 
+                          onChange={(e) => setWatermarkOpacity(Number(e.target.value))}
+                          className="w-full accent-red-600 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {tool.id === 'protect' && (
+                    <div className="space-y-3">
+                      <label className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <Lock size={16} className="text-red-600" />
+                        Secure Password
+                      </label>
+                      <input 
+                        type="password" 
+                        value={pdfPassword} 
+                        onChange={(e) => setPdfPassword(e.target.value)}
+                        placeholder="Enter password..."
+                        className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 focus:border-red-600 outline-none dark:text-white font-bold text-lg transition-all"
+                      />
+                      <p className="text-xs text-slate-400 font-medium">Use a strong password to lock permissions and protect your document.</p>
+                    </div>
+                  )}
+                  {tool.id === 'page-numbers' && (
+                    <div className="p-5 bg-red-50/50 dark:bg-slate-900/40 border border-red-100 dark:border-slate-800 rounded-2xl text-slate-600 dark:text-slate-400 font-medium text-sm leading-relaxed flex gap-3">
+                      <Info size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        This tool dynamically appends standard page numbering (e.g. <span className="font-bold">"Page X of Y"</span>) to the bottom-right corner of every page in your PDF file. No additional configuration is needed.
                       </div>
                     </div>
                   )}
@@ -363,7 +447,7 @@ const ToolPage: React.FC = () => {
               </h2>
               <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6">How to {tool.name.toLowerCase()}</h3>
               <div className="space-y-4">
-                {extraContent?.steps.map((step, idx) => (
+                {stepsList.map((step, idx) => (
                   <div key={idx} className="flex gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                     <div className="flex-shrink-0 w-8 h-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg flex items-center justify-center font-black text-sm">
                       {idx + 1}
@@ -383,7 +467,7 @@ const ToolPage: React.FC = () => {
               </h2>
               <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6">Frequently Asked Questions</h3>
               <div className="space-y-6">
-                {extraContent?.faqs.map((faq, idx) => (
+                {faqsList.map((faq, idx) => (
                   <div key={idx} className="space-y-2">
                     <h4 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-600"></div>
