@@ -351,6 +351,36 @@ const ToolPage: React.FC = () => {
           </div>
         </section>
 
+        {/* Recommended Tools Section */}
+        {TOOLS.filter(t => t.category === tool.category && t.id !== tool.id).length > 0 && (
+          <section className="mt-20">
+            <h2 className="text-sm font-black text-red-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Layers size={16} />
+              Recommended Tools
+            </h2>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-8">Related to {tool.category}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {TOOLS.filter(t => t.category === tool.category && t.id !== tool.id).slice(0, 3).map((recommendedTool) => (
+                <Link
+                  key={recommendedTool.id}
+                  to={recommendedTool.path}
+                  className="group flex flex-col bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                >
+                  <div className="bg-slate-50 dark:bg-slate-900 w-12 h-12 flex items-center justify-center rounded-xl mb-4 text-slate-400 group-hover:bg-red-600 group-hover:text-white transition-all">
+                    {getIcon(recommendedTool.icon, 24)}
+                  </div>
+                  <h4 className="font-black text-lg text-slate-900 dark:text-white mb-2 group-hover:text-red-600 transition-colors">
+                    {recommendedTool.name}
+                  </h4>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {recommendedTool.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Bottom CTA */}
         <div className="mt-24 p-12 bg-slate-900 dark:bg-white rounded-[3rem] text-center text-white dark:text-slate-900 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-1000"></div>

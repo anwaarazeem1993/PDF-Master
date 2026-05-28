@@ -70,9 +70,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/merge-pdf', 
     enabled: true,
-    seoTitle: 'Merge PDF Online - Combine PDF Files for Free',
-    seoDescription: 'Join multiple PDF files into one document in seconds. No registration required. Fast, safe, and secure PDF merger.',
-    keywords: ['merge pdf', 'combine pdf', 'join pdf files', 'pdf binder']
+    seoTitle: 'Merge PDF Files Online Free | Best PDF Combiner & Joiner Tool',
+    seoDescription: 'Join and combine multiple PDF files into one single document in seconds. No registration required. Fast, safe, secure, and entirely client-side PDF merger.',
+    keywords: ['merge pdf', 'combine pdf', 'join pdf files', 'pdf binder', 'merge pdf online free', 'combine multiple pdfs into one', 'best pdf merger tool', 'how to merge pdf files']
   },
   { 
     id: 'split', 
@@ -82,9 +82,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/split-pdf', 
     enabled: true,
-    seoTitle: 'Split PDF Online - Extract Pages from PDF for Free',
-    seoDescription: 'Separate PDF pages or extract a specific page range into a new PDF document. Simple and free PDF splitter.',
-    keywords: ['split pdf', 'extract pdf pages', 'separate pdf', 'pdf cutter']
+    seoTitle: 'Split PDF Online | Extract PDF Pages to Separate Files Free',
+    seoDescription: 'Separate PDF pages or extract a specific page range into a new PDF document. Simple, free, and secure client-side PDF splitter.',
+    keywords: ['split pdf', 'extract pdf pages', 'separate pdf', 'pdf cutter', 'split pdf online free', 'extract pages from pdf file', 'split pdf into multiple files', 'pdf page extractor']
   },
   { 
     id: 'compress', 
@@ -94,9 +94,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.OPTIMIZE, 
     path: '/compress-pdf', 
     enabled: true,
-    seoTitle: 'Compress PDF Online - Reduce PDF File Size Free',
-    seoDescription: 'Shrink your PDF files without losing quality. Optimize documents for email and web upload.',
-    keywords: ['compress pdf', 'reduce pdf size', 'shrink pdf', 'optimize pdf']
+    seoTitle: 'Compress PDF Online | Reduce PDF File Size Without Losing Quality',
+    seoDescription: 'Shrink your PDF files without losing quality. Optimize documents for email and web upload with our advanced, secure PDF compressor.',
+    keywords: ['compress pdf', 'reduce pdf size', 'shrink pdf', 'optimize pdf', 'compress pdf online free', 'reduce pdf size below 100kb', 'fast pdf compressor', 'pdf optimizer']
   },
   { 
     id: 'pdf-to-word', 
@@ -106,9 +106,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_FROM, 
     path: '/pdf-to-word', 
     enabled: true,
-    seoTitle: 'Convert PDF to Word Online - Free PDF to DOCX',
-    seoDescription: 'Transform PDF documents into editable Word files with high accuracy. Fast and free PDF to Word converter.',
-    keywords: ['pdf to word', 'convert pdf to docx', 'pdf to editable word']
+    seoTitle: 'Convert PDF to Word Online | Free PDF to DOCX Converter',
+    seoDescription: 'Transform PDF documents into editable Word files with high accuracy. Fast and free PDF to Word converter that preserves table structures and fonts.',
+    keywords: ['pdf to word', 'convert pdf to docx', 'pdf to editable word', 'pdf to word converter free online', 'how to convert pdf to word document', 'best pdf to word tool']
   },
   { 
     id: 'pdf-to-ppt', 
@@ -118,9 +118,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_FROM, 
     path: '/pdf-to-powerpoint', 
     enabled: true,
-    seoTitle: 'PDF to PowerPoint Converter - PDF to PPT Online',
-    seoDescription: 'Convert your PDF documents into editable PowerPoint slides. High-quality PPTX output.',
-    keywords: ['pdf to ppt', 'pdf to powerpoint', 'convert pdf to slides']
+    seoTitle: 'PDF to PowerPoint Converter | Free PDF to PPTX Online',
+    seoDescription: 'Convert your PDF documents into editable PowerPoint slides. High-quality PPTX output perfect for presentations and slide decks.',
+    keywords: ['pdf to ppt', 'pdf to powerpoint', 'convert pdf to slides', 'pdf to pptx converter online', 'free pdf to powerpoint tool', 'editable ppt from pdf']
   },
   { 
     id: 'pdf-to-excel', 
@@ -130,9 +130,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_FROM, 
     path: '/pdf-to-excel', 
     enabled: true,
-    seoTitle: 'PDF to Excel Converter - Free PDF to XLS Online',
-    seoDescription: 'Extract PDF data and convert it into editable Excel spreadsheets. Table structure remains intact.',
-    keywords: ['pdf to excel', 'pdf to xls', 'extract tables from pdf']
+    seoTitle: 'PDF to Excel Converter | Free PDF to XLS/XLSX Online',
+    seoDescription: 'Extract PDF data and convert it into editable Excel spreadsheets. Table structure remains intact for seamless data analysis.',
+    keywords: ['pdf to excel', 'pdf to xls', 'extract tables from pdf', 'convert pdf data to excel sheet', 'pdf to xlsx converter free', 'pdf table extractor']
   },
   { 
     id: 'jpg-to-pdf', 
@@ -142,9 +142,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_TO, 
     path: '/jpg-to-pdf', 
     enabled: true,
-    seoTitle: 'JPG to PDF Converter - Images to PDF Online',
-    seoDescription: 'Turn your image files into a PDF document easily. Supports JPG, PNG, and more.',
-    keywords: ['jpg to pdf', 'images to pdf', 'photo to pdf']
+    seoTitle: 'JPG to PDF Converter | Convert Images to PDF Document Free',
+    seoDescription: 'Turn your image files into a PDF document easily. Supports JPG, PNG, TIFF and more for quick image-to-PDF conversion.',
+    keywords: ['jpg to pdf', 'images to pdf', 'photo to pdf', 'convert png to pdf online', 'combine images into pdf', 'free photo to pdf maker']
   },
   { 
     id: 'sign', 
@@ -154,9 +154,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/sign-pdf', 
     enabled: true,
-    seoTitle: 'Sign PDF Online - Free Digital Signature Tool',
-    seoDescription: 'Create and add your signature to PDF documents easily. Electronic signatures for free.',
-    keywords: ['sign pdf', 'e-signature', 'digital signature', 'sign documents online']
+    seoTitle: 'Sign PDF Online | Free Electronic Digital Signature Tool',
+    seoDescription: 'Create and add your signature to PDF documents easily. Secure, fast electronic signatures for contracts and forms.',
+    keywords: ['sign pdf', 'e-signature', 'digital signature', 'sign documents online', 'free pdf signer online', 'draw signature on pdf', 'fill and sign pdf']
   },
   { 
     id: 'watermark', 
@@ -166,9 +166,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/watermark-pdf', 
     enabled: true,
-    seoTitle: 'Add Watermark to PDF Online - Free PDF Protection',
-    seoDescription: 'Protect your work with custom text or image watermarks. Choose opacity and position.',
-    keywords: ['watermark pdf', 'add text to pdf', 'pdf protection']
+    seoTitle: 'Add Watermark to PDF Online | Free PDF Protection Tool',
+    seoDescription: 'Protect your work with custom text or image watermarks. Choose opacity, rotation, and position for perfect PDF watermarks.',
+    keywords: ['watermark pdf', 'add text to pdf', 'pdf protection', 'add image watermark to pdf', 'stamp pdf online free', 'secure pdf with watermark']
   },
   { 
     id: 'rotate', 
@@ -178,9 +178,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/rotate-pdf', 
     enabled: true,
-    seoTitle: 'Rotate PDF Online - Permanently Fix PDF Orientation',
-    seoDescription: 'Flip and rotate PDF pages clockwise or counter-clockwise. Save orientation forever.',
-    keywords: ['rotate pdf', 'flip pdf pages', 'pdf orientation']
+    seoTitle: 'Rotate PDF Pages Online | Permanently Fix PDF Orientation',
+    seoDescription: 'Flip and rotate PDF pages clockwise or counter-clockwise. Save your document orientation permanently for free.',
+    keywords: ['rotate pdf', 'flip pdf pages', 'pdf orientation', 'rotate pdf online free', 'change pdf orientation', 'fix upside down pdf']
   },
   { 
     id: 'html-to-pdf', 
@@ -190,9 +190,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_TO, 
     path: '/html-to-pdf', 
     enabled: true,
-    seoTitle: 'HTML to PDF Converter - Web to PDF Online',
-    seoDescription: 'Save any webpage as a PDF document. High fidelity HTML rendering.',
-    keywords: ['html to pdf', 'web to pdf', 'save page as pdf']
+    seoTitle: 'HTML to PDF Converter | Save Web Pages as PDF Online',
+    seoDescription: 'Save any webpage or raw HTML code as a PDF document. High fidelity HTML rendering for perfect layout preservation.',
+    keywords: ['html to pdf', 'web to pdf', 'save page as pdf', 'convert webpage to pdf document', 'html code to pdf generator', 'website to pdf converter free']
   },
   { 
     id: 'unlock', 
@@ -202,9 +202,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.SECURITY, 
     path: '/unlock-pdf', 
     enabled: true,
-    seoTitle: 'Unlock PDF - Remove Password from PDF Online',
-    seoDescription: 'Remove PDF password security and permissions to edit and print freely.',
-    keywords: ['unlock pdf', 'remove pdf password', 'pdf decrypter']
+    seoTitle: 'Unlock PDF Online | Free PDF Password Remover Tool',
+    seoDescription: 'Remove PDF password security and permissions to edit, print, and copy freely. Fast and secure PDF decrypter.',
+    keywords: ['unlock pdf', 'remove pdf password', 'pdf decrypter', 'unlock secured pdf free', 'remove read restrictions from pdf', 'bypass pdf password online']
   },
   { 
     id: 'protect', 
@@ -214,9 +214,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.SECURITY, 
     path: '/protect-pdf', 
     enabled: true,
-    seoTitle: 'Protect PDF with Password - Free PDF Encryption',
-    seoDescription: 'Encrypt your sensitive PDF files with a secure password. Keep your documents private.',
-    keywords: ['protect pdf', 'password protect pdf', 'encrypt pdf']
+    seoTitle: 'Protect PDF with Password | Encrypt PDF Files Securely Online',
+    seoDescription: 'Encrypt your sensitive PDF files with a secure password. Keep your documents private with advanced AES encryption.',
+    keywords: ['protect pdf', 'password protect pdf', 'encrypt pdf', 'add password to pdf online', 'secure pdf document free', 'pdf locker tool']
   },
   { 
     id: 'organize', 
@@ -226,9 +226,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/organize-pdf', 
     enabled: true,
-    seoTitle: 'Organize PDF Online - Rearrange & Delete Pages',
-    seoDescription: 'Manage your PDF pages by reordering them or removing unwanted pages.',
-    keywords: ['organize pdf', 'reorder pdf pages', 'delete pdf pages']
+    seoTitle: 'Organize PDF Pages Online | Rearrange & Delete Pages Free',
+    seoDescription: 'Manage your PDF pages by reordering them or removing unwanted pages. Complete control over your document layout.',
+    keywords: ['organize pdf', 'reorder pdf pages', 'delete pdf pages', 'remove pages from pdf online', 'sort pdf pages tool', 'arrange pdf document']
   },
   { 
     id: 'pdf-a', 
@@ -238,9 +238,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.OPTIMIZE, 
     path: '/pdf-to-pdfa', 
     enabled: true,
-    seoTitle: 'Convert PDF to PDF/A Online - Archival Format',
-    seoDescription: 'Transform your PDF into the standardized archival format for long-term storage.',
-    keywords: ['pdf to pdfa', 'archive pdf', 'iso pdf standard']
+    seoTitle: 'Convert PDF to PDF/A Online | Archival Format Generator',
+    seoDescription: 'Transform your PDF into the standardized archival format (PDF/A) for long-term storage and compliance with ISO standards.',
+    keywords: ['pdf to pdfa', 'archive pdf', 'iso pdf standard', 'convert pdf to archive format', 'pdf/a converter free', 'long term storage pdf']
   },
   { 
     id: 'repair', 
@@ -250,9 +250,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.OPTIMIZE, 
     path: '/repair-pdf', 
     enabled: true,
-    seoTitle: 'Repair Corrupted PDF Online - Fix Damaged PDF',
-    seoDescription: 'Try to recover and fix files that won\'t open or are corrupted.',
-    keywords: ['repair pdf', 'fix corrupted pdf', 'recover pdf']
+    seoTitle: 'Repair Corrupted PDF Online | Fix Damaged PDF Files Free',
+    seoDescription: 'Try to recover and fix PDF files that will not open or show corrupted data errors. Advanced PDF recovery utility.',
+    keywords: ['repair pdf', 'fix corrupted pdf', 'recover pdf', 'repair damaged pdf online', 'pdf recovery tool free', 'fix broken pdf file']
   },
   { 
     id: 'page-numbers', 
@@ -262,9 +262,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/add-page-numbers', 
     enabled: true,
-    seoTitle: 'Add Page Numbers to PDF Online - Number PDF Pages',
-    seoDescription: 'Easily add pagination to your documents with customizable fonts and positions.',
-    keywords: ['page numbers pdf', 'number pdf pages', 'pdf pagination']
+    seoTitle: 'Add Page Numbers to PDF Online | Custom PDF Pagination',
+    seoDescription: 'Easily add pagination to your documents with customizable fonts, margins, and placement positions. Number your PDFs instantly.',
+    keywords: ['page numbers pdf', 'number pdf pages', 'pdf pagination', 'insert page numbers in pdf free', 'add bates numbering to pdf']
   },
   { 
     id: 'scan', 
@@ -274,9 +274,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.CONVERT_TO, 
     path: '/scan-to-pdf', 
     enabled: true,
-    seoTitle: 'Scan to PDF Online - Camera Scanner to PDF',
-    seoDescription: 'Use your phone or webcam to scan physical documents into high-quality PDFs.',
-    keywords: ['scan to pdf', 'mobile scanner', 'camera to pdf']
+    seoTitle: 'Scan to PDF Online | Free Camera Scanner Tool',
+    seoDescription: 'Use your phone, tablet, or webcam to scan physical documents directly into high-quality PDFs from your browser.',
+    keywords: ['scan to pdf', 'mobile scanner', 'camera to pdf', 'webcam to pdf converter', 'scan documents online free', 'browser based pdf scanner']
   },
   { 
     id: 'ocr', 
@@ -286,9 +286,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/ocr-pdf', 
     enabled: true,
-    seoTitle: 'OCR PDF Online - Scanned PDF to Searchable Text',
-    seoDescription: 'Extract text from scanned PDF images using advanced OCR technology.',
-    keywords: ['ocr pdf', 'optical character recognition', 'scanned pdf to text']
+    seoTitle: 'OCR PDF Online | Convert Scanned PDF to Searchable Text',
+    seoDescription: 'Extract text from scanned PDF images using advanced Optical Character Recognition (OCR) technology for free.',
+    keywords: ['ocr pdf', 'optical character recognition', 'scanned pdf to text', 'make pdf searchable online', 'extract text from scanned document free']
   },
   { 
     id: 'compare', 
@@ -298,9 +298,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/compare-pdf', 
     enabled: true,
-    seoTitle: 'Compare PDF Files Online - Find Differences',
-    seoDescription: 'Upload two PDFs and see exactly what changed between the versions.',
-    keywords: ['compare pdf', 'pdf diff', 'check pdf changes']
+    seoTitle: 'Compare PDF Files Online | Find Document Differences Free',
+    seoDescription: 'Upload two PDFs and see exactly what changed between the versions. Highlight additions, deletions, and modifications instantly.',
+    keywords: ['compare pdf', 'pdf diff', 'check pdf changes', 'highlight differences between two pdfs', 'pdf comparison tool online']
   },
   { 
     id: 'redact', 
@@ -310,9 +310,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.EDIT, 
     path: '/redact-pdf', 
     enabled: true,
-    seoTitle: 'Redact PDF Online - Remove Sensitive Data',
-    seoDescription: 'Securely black out text and images in your PDF permanently.',
-    keywords: ['redact pdf', 'black out text pdf', 'remove private data']
+    seoTitle: 'Redact PDF Online | Securely Remove Sensitive Data & Text',
+    seoDescription: 'Securely black out text and images in your PDF permanently. Protect sensitive data with our reliable redaction tool.',
+    keywords: ['redact pdf', 'black out text pdf', 'remove private data', 'hide sensitive info in pdf', 'pdf redaction tool free']
   },
   { 
     id: 'crop', 
@@ -322,9 +322,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/crop-pdf', 
     enabled: true,
-    seoTitle: 'Crop PDF Online - Trim PDF Margins',
-    seoDescription: 'Crop PDF pages to custom dimensions or remove white borders easily.',
-    keywords: ['crop pdf', 'trim pdf', 'cut pdf margins']
+    seoTitle: 'Crop PDF Pages Online | Trim PDF Margins & Whitespace Free',
+    seoDescription: 'Crop PDF pages to custom dimensions or remove white borders easily. Precisely trim document margins.',
+    keywords: ['crop pdf', 'trim pdf', 'cut pdf margins', 'remove whitespace from pdf online', 'adjust pdf page size free']
   },
   { 
     id: 'workflow', 
@@ -334,9 +334,9 @@ export const TOOLS: PDFTool[] = [
     category: ToolCategory.ORGANIZE, 
     path: '/pdf-workflow', 
     enabled: true,
-    seoTitle: 'PDF Workflow Automation - Multi-step PDF Tasks',
-    seoDescription: 'Build custom automation sequences for your document management needs.',
-    keywords: ['pdf workflow', 'automate pdf', 'pdf batch processing']
+    seoTitle: 'PDF Workflow Automation | Batch Process Multi-step Tasks',
+    seoDescription: 'Build custom automation sequences for your document management needs. Combine, compress, OCR and protect in one click.',
+    keywords: ['pdf workflow', 'automate pdf', 'pdf batch processing', 'multi step pdf online tool', 'chain pdf actions free']
   }
 ];
 

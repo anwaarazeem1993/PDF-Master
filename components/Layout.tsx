@@ -227,7 +227,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ))}
           </div>
           <div className="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-slate-500 font-bold uppercase tracking-widest">
-            <p>© 2024 PDF Master. Engineered for Privacy.</p>
+            <p>© 2026 PDF MASTER COPY RIGHT</p>
           </div>
         </div>
       </footer>
