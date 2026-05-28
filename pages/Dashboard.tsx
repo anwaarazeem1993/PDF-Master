@@ -5,6 +5,7 @@ import { Clock, File, Trash2, Download, Settings, User as UserIcon, BarChart } f
 import { useAuth } from '../components/AuthContext';
 import { TOOLS, getIcon } from '../constants';
 import SEO from '../components/SEO';
+import WorkflowBuilder from '../components/WorkflowBuilder';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -112,6 +113,9 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Workflow Builder Section */}
+          <WorkflowBuilder />
         </main>
       </div>
     </div>
