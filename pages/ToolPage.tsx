@@ -262,8 +262,16 @@ const ToolPage: React.FC = () => {
                 <CheckCircle2 size={48} />
               </div>
               <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Success!</h3>
-              <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 font-medium">Your PDF is ready for download.</p>
+              <p className="text-lg text-slate-500 dark:text-slate-400 mb-8 font-medium">Your PDF is ready for download.</p>
               
+              <div className="mb-12 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 max-w-xl mx-auto aspect-[1/1.3] shadow-inner relative group">
+                <embed src={`${downloadUrl}#toolbar=0&navpanes=0&scrollbar=0`} type="application/pdf" className="w-full h-full object-contain pointer-events-none" />
+                <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
+                <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Processed PDF Preview</span>
+                </div>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a 
                   href={downloadUrl} 

@@ -10,12 +10,19 @@ import {
 import { TOOLS, getIcon, DEFAULT_SEO } from '../constants.tsx';
 import { ToolCategory } from '../types.ts';
 import SEO from '../components/SEO.tsx';
+import AdSenseBanner from '../components/AdSenseBanner.tsx';
 
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'All'>('All');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [siteConfig, setSiteConfig] = useState({ adsEnabled: true });
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('admin_settings');
+    if (saved) setSiteConfig(JSON.parse(saved));
+  }, []);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,6 +64,103 @@ const Home: React.FC = () => {
     { q: "Can I use PDF Master on mobile?", a: "Absolutely. Our suite is fully responsive and works on any modern browser on iOS, Android, and Desktop." },
     { q: "What happens if my file is very large?", a: "Since we use your device's power, performance depends on your RAM. Most modern devices handle PDFs up to 500MB with ease." }
   ];
+
+  const getToolPreview = (toolId: string) => {
+    const genericFile = <div className="w-10 h-14 bg-white rounded-lg flex items-center justify-center text-slate-900 text-xs font-black border border-slate-300 relative shadow-sm">PDF<div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-bl-lg rounded-tr-lg" /></div>;
+    const genericOutput = <div className="w-10 h-14 bg-red-600 rounded-lg flex items-center justify-center text-white text-xs font-black shadow-lg relative">PDF<div className="absolute top-0 right-0 w-3 h-3 bg-red-800 rounded-bl-lg rounded-tr-lg" /></div>;
+    const wordFile = <div className="w-10 h-14 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-black shadow-lg">DOC</div>;
+    const imgFile = <div className="w-10 h-14 bg-green-500 rounded-lg flex items-center justify-center text-white text-xs font-black shadow-lg">JPG</div>;
+
+    switch (toolId) {
+      case 'merge':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            <div className="relative w-12 h-14">
+              <div className="absolute shadow-sm -left-2 -top-1 opacity-60 rotate-[-10deg]">{genericFile}</div>
+              <div className="absolute shadow-sm left-2 rotate-[4deg]">{genericFile}</div>
+            </div>
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="scale-110">{genericOutput}</div>
+          </div>
+        );
+      case 'split':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            <div className="scale-110">{genericFile}</div>
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="relative w-16 h-14">
+              <div className="absolute -left-2 top-2 opacity-90 -rotate-[10deg]">{genericOutput}</div>
+              <div className="absolute left-2 -top-1 opacity-90 rotate-[10deg]">{genericOutput}</div>
+              <div className="absolute left-6 top-1 rotate-[5deg]">{genericOutput}</div>
+            </div>
+          </div>
+        );
+      case 'compress':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            <div className="scale-110 relative">
+              {genericFile}
+              <div className="absolute -bottom-2 -right-3 bg-slate-800 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">10MB</div>
+            </div>
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="scale-90 relative">
+              {genericOutput}
+              <div className="absolute -bottom-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">1MB</div>
+            </div>
+          </div>
+        );
+      case 'pdf-to-word':
+      case 'pdf-to-ppt':
+      case 'pdf-to-excel':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            {genericFile}
+            <ArrowRight className="text-white/50" size={16} />
+            {wordFile}
+          </div>
+        );
+      case 'jpg-to-pdf':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            {imgFile}
+            <ArrowRight className="text-white/50" size={16} />
+            {genericOutput}
+          </div>
+        );
+      case 'protect':
+        return (
+          <div className="flex items-center gap-4 z-30">
+            {genericFile}
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="relative">
+              {genericOutput}
+              <div className="absolute inset-0 bg-slate-900/60 rounded-lg flex items-center justify-center backdrop-blur-[1px]">
+                  <Lock size={12} className="text-white" />
+              </div>
+            </div>
+          </div>
+        );
+      case 'rotate':
+        return (
+          <div className="flex items-center gap-6 z-30">
+            {genericFile}
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="rotate-90 shadow-2xl">{genericOutput}</div>
+          </div>
+        );
+      default:
+         return (
+          <div className="flex items-center gap-4 z-30">
+            {genericFile}
+            <ArrowRight className="text-white/50" size={16} />
+            <div className="relative">
+              {genericOutput}
+              <Sparkles size={16} className="absolute -top-2 -right-2 text-yellow-400 fill-yellow-400 animate-pulse" />
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="pb-20 overflow-x-hidden bg-white dark:bg-slate-900 transition-colors duration-300">
@@ -103,7 +207,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Tool Categories & Grid */}
-      <section className="container mx-auto px-4 mb-32">
+      <section className="container mx-auto px-4 mb-16">
         <div className="flex flex-wrap justify-center gap-3 mb-12">
             {categories.map((cat) => (
                 <button
@@ -138,15 +242,22 @@ const Home: React.FC = () => {
             filteredTools.map((tool) => (
               <Link 
                 key={tool.id} to={tool.path}
-                className="tool-card group relative bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-start"
+                className="tool-card group relative overflow-hidden bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-start"
               >
                 <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl mb-8 text-slate-400 group-hover:bg-red-600 group-hover:text-white group-hover:rotate-6 transition-all duration-300">
                   {getIcon(tool.icon, 32)}
                 </div>
                 <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-red-600 transition-colors">{tool.name}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium mb-6 flex-grow">{tool.description}</p>
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-600 group-hover:gap-4 transition-all">
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium mb-6 flex-grow relative z-10">{tool.description}</p>
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-600 group-hover:gap-4 transition-all relative z-10">
                     Start Tool <ArrowRight size={16} />
+                </div>
+                
+                {/* Hover Preview Overlay */}
+                <div className="absolute inset-0 top-1/2 translate-y-1/2 opacity-0 group-hover:top-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl z-20 p-8 flex flex-col justify-center items-center text-center pointer-events-none">
+                  <div className="bg-white/10 text-white/70 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-8">Logic Preview</div>
+                  {getToolPreview(tool.id)}
+                  <div className="mt-8 text-white/50 text-[10px] font-bold uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl">Click to execute</div>
                 </div>
               </Link>
             ))
@@ -158,6 +269,13 @@ const Home: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Middle Ad Placement */}
+      {siteConfig.adsEnabled && (
+        <section className="container mx-auto px-4 mb-16">
+          <AdSenseBanner />
+        </section>
+      )}
 
       {/* USP Section */}
       <section className="bg-slate-50 dark:bg-slate-800/50 py-24 mb-32 border-y border-slate-100 dark:border-slate-800">

@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext.tsx';
 import { TOOLS, getIcon } from '../constants.tsx';
 import { ToolCategory } from '../types.ts';
 import Breadcrumb from './Breadcrumb.tsx';
+import AdSenseBanner from './AdSenseBanner.tsx';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -166,9 +167,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Top Ad Placement */}
-      {siteConfig.adsEnabled && siteConfig.topAdHtml && (
+      {siteConfig.adsEnabled && (
         <div className="container mx-auto px-4 mt-6 flex justify-center overflow-hidden">
-          <div dangerouslySetInnerHTML={{ __html: siteConfig.topAdHtml }} />
+          {siteConfig.topAdHtml ? (
+            <div dangerouslySetInnerHTML={{ __html: siteConfig.topAdHtml }} />
+          ) : (
+            <AdSenseBanner />
+          )}
         </div>
       )}
 
@@ -182,9 +187,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Bottom Ad Placement */}
-      {siteConfig.adsEnabled && siteConfig.bottomAdHtml && (
+      {siteConfig.adsEnabled && (
         <div className="container mx-auto px-4 mb-8 flex justify-center overflow-hidden">
-          <div dangerouslySetInnerHTML={{ __html: siteConfig.bottomAdHtml }} />
+          {siteConfig.bottomAdHtml ? (
+            <div dangerouslySetInnerHTML={{ __html: siteConfig.bottomAdHtml }} />
+          ) : (
+            <AdSenseBanner />
+          )}
         </div>
       )}
 
