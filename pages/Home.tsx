@@ -11,8 +11,10 @@ import { TOOLS, getIcon, DEFAULT_SEO } from '../constants.tsx';
 import { ToolCategory } from '../types.ts';
 import SEO from '../components/SEO.tsx';
 import AdSenseBanner from '../components/AdSenseBanner.tsx';
+import { useI18n } from '../components/I18nContext.tsx';
 
 const Home: React.FC = () => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'All'>('All');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -180,17 +182,16 @@ const Home: React.FC = () => {
             The Next Generation of PDF Tools
           </div>
           <h1 className="text-5xl md:text-8xl font-black text-slate-900 dark:text-white mb-8 tracking-tighter leading-[0.9] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            Smart PDF Tools <br />
+            {t('hero.title', 'Smart PDF Tools')} <br />
             <span className="text-red-600 relative">
-                Without the Wait
+                {t('hero.subtitle2', 'Without the Wait')}
                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 338 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 10.5C65.5 3 131 1 337 4.5" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
                 </svg>
             </span>
           </h1>
           <p className="text-xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto mb-12 animate-in fade-in duration-1000 delay-300">
-            Privacy-first PDF management. No cloud uploads. No privacy leaks. 
-            Just professional tools running directly in your browser.
+            {t('hero.description', 'Privacy-first PDF management. No cloud uploads. No privacy leaks. Just professional tools running directly in your browser.')}
           </p>
 
           <div className="max-w-2xl mx-auto relative group mb-16 animate-in fade-in zoom-in duration-700 delay-500">
@@ -247,8 +248,8 @@ const Home: React.FC = () => {
                 <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl mb-8 text-slate-400 group-hover:bg-red-600 group-hover:text-white group-hover:rotate-6 transition-all duration-300">
                   {getIcon(tool.icon, 32)}
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-red-600 transition-colors">{tool.name}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium mb-6 flex-grow relative z-10">{tool.description}</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-red-600 transition-colors">{t(`tool.${tool.id}.name`, tool.name)}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium mb-6 flex-grow relative z-10">{t(`tool.${tool.id}.desc`, tool.description)}</p>
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-600 group-hover:gap-4 transition-all relative z-10">
                     Start Tool <ArrowRight size={16} />
                 </div>

@@ -12,13 +12,29 @@ import SEO from '../components/SEO.tsx';
 import { useAuth } from '../components/AuthContext.tsx';
 
 import Breadcrumb from '../components/Breadcrumb.tsx';
+import PdfCanvasPreview from '../components/PdfCanvasPreview.tsx';
+import { useI18n } from '../components/I18nContext.tsx';
 
 type Stage = 'upload' | 'config' | 'processing' | 'success';
+
+const getOutputConfig = (toolId: string) => {
+  switch (toolId) {
+    case 'pdf-to-word':
+      return { ext: 'docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Download Word', name: 'Word Document' };
+    case 'pdf-to-ppt':
+      return { ext: 'pptx', mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', label: 'Download PPT', name: 'PowerPoint Document' };
+    case 'pdf-to-excel':
+      return { ext: 'xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Download Excel', name: 'Excel Spreadsheet' };
+    default:
+      return { ext: 'pdf', mime: 'application/pdf', label: 'Download PDF', name: 'PDF' };
+  }
+};
 
 const ToolPage: React.FC = () => {
   const { toolId } = useParams();
   const navigate = useNavigate();
   const { user, addHistory } = useAuth();
+  const { t } = useI18n();
   
   // Find tool based on URL path mapping
   const tool = TOOLS.find(t => t.path.includes(toolId || ''));
@@ -33,6 +49,7 @@ const ToolPage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const extraContent = tool ? TOOL_CONTENT[tool.id] : null;
+  const outputConfig = tool ? getOutputConfig(tool.id) : getOutputConfig('default');
 
   useEffect(() => {
     if (files.length > 0 && stage === 'upload') {
@@ -92,12 +109,13 @@ const ToolPage: React.FC = () => {
       }
 
       setProcessingProgress(100);
-      const blob = new Blob([result], { type: 'application/pdf' });
+      const blob = new Blob([result], { type: outputConfig.mime });
       setDownloadUrl(URL.createObjectURL(blob));
       setStage('success');
+      const baseFileName = files[0]?.name ? files[0].name.replace(/\.[^/.]+$/, "") : tool.name;
       addHistory({ 
         tool: tool.id, 
-        fileName: files[0]?.name || `${tool.name}.pdf`, 
+        fileName: `${baseFileName}.${outputConfig.ext}`, 
         status: 'completed' 
       });
     } catch (err: any) {
@@ -106,11 +124,16 @@ const ToolPage: React.FC = () => {
     }
   };
 
+  const translatedName = t(`tool.${tool.id}.name`, tool.name);
+  const translatedDesc = t(`tool.${tool.id}.desc`, tool.description);
+  const translatedSeoTitle = t(`tool.${tool.id}.seoTitle`, tool.seoTitle);
+  const translatedSeoDesc = t(`tool.${tool.id}.seoDesc`, tool.seoDescription);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": `How to use ${tool.name}`,
-    "description": tool.description,
+    "name": `How to use ${translatedName}`,
+    "description": translatedDesc,
     "step": extraContent?.steps.map((s, i) => ({
       "@type": "HowToStep",
       "position": i + 1,
@@ -121,8 +144,8 @@ const ToolPage: React.FC = () => {
   return (
     <div className="min-h-screen py-8 md:py-16 px-4 bg-slate-50 dark:bg-slate-900 transition-colors">
       <SEO 
-        title={tool.seoTitle} 
-        description={tool.seoDescription}
+        title={translatedSeoTitle} 
+        description={translatedSeoDesc}
         keywords={tool.keywords}
         schema={schema}
       />
@@ -131,7 +154,7 @@ const ToolPage: React.FC = () => {
         {/* Breadcrumbs */}
         <Breadcrumb items={[
           { label: tool.category },
-          { label: tool.name }
+          { label: translatedName }
         ]} />
 
         {/* Hero Section */}
@@ -140,10 +163,10 @@ const ToolPage: React.FC = () => {
             {getIcon(tool.icon, 48)}
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter">
-            {tool.name}
+            {translatedName}
           </h1>
           <p className="text-xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            {tool.description}
+            {translatedDesc}
           </p>
         </div>
 
@@ -165,7 +188,7 @@ const ToolPage: React.FC = () => {
               {previewUrl && (
                 <div className="mb-8 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-[1/1.3] shadow-inner relative group">
                   {files[0].type === 'application/pdf' ? (
-                    <embed src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`} type="application/pdf" className="w-full h-full object-contain pointer-events-none" />
+                    <PdfCanvasPreview fileUrl={previewUrl} className="w-full h-full" />
                   ) : (
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
                   )}
@@ -262,24 +285,26 @@ const ToolPage: React.FC = () => {
                 <CheckCircle2 size={48} />
               </div>
               <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Success!</h3>
-              <p className="text-lg text-slate-500 dark:text-slate-400 mb-8 font-medium">Your PDF is ready for download.</p>
+              <p className="text-lg text-slate-500 dark:text-slate-400 mb-8 font-medium">Your {outputConfig.name} is ready for download.</p>
               
-              <div className="mb-12 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 max-w-xl mx-auto aspect-[1/1.3] shadow-inner relative group">
-                <embed src={`${downloadUrl}#toolbar=0&navpanes=0&scrollbar=0`} type="application/pdf" className="w-full h-full object-contain pointer-events-none" />
-                <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
-                <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Processed PDF Preview</span>
+              {outputConfig.ext === 'pdf' && (
+                <div className="mb-12 rounded-[2rem] overflow-hidden border-4 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 max-w-xl mx-auto aspect-[1/1.3] shadow-inner relative group">
+                  <embed src={`${downloadUrl}#toolbar=0&navpanes=0&scrollbar=0`} type="application/pdf" className="w-full h-full object-contain pointer-events-none" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem] pointer-events-none"></div>
+                  <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-slate-900/80 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl">Processed PDF Preview</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a 
                   href={downloadUrl} 
-                  download={`${tool.id}_result.pdf`}
+                  download={`${tool.id}_result.${outputConfig.ext}`}
                   className="bg-red-600 text-white px-10 py-5 rounded-[1.5rem] font-black text-xl hover:bg-red-700 transition-all shadow-2xl flex items-center gap-3 group"
                 >
                   <Download size={24} className="group-hover:translate-y-1 transition-transform" />
-                  Download PDF
+                  {outputConfig.label}
                 </a>
                 <button 
                   onClick={() => {

@@ -9,13 +9,15 @@ import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import { AuthProvider } from './components/AuthContext.tsx';
+import { I18nProvider } from './components/I18nContext.tsx';
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
+    <I18nProvider>
+      <AuthProvider>
+        <Router>
+          <Layout>
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -28,7 +30,8 @@ const App: React.FC = () => {
           </Routes>
         </Layout>
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </I18nProvider>
   );
 };
 

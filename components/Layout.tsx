@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Menu, X, Sun, Moon, Settings, LayoutDashboard, ChevronDown, Globe } from 'lucide-react';
 import { useAuth } from './AuthContext.tsx';
+import { useI18n, Language } from './I18nContext.tsx';
 import { TOOLS, getIcon } from '../constants.tsx';
 import { ToolCategory } from '../types.ts';
 import Breadcrumb from './Breadcrumb.tsx';
@@ -26,6 +27,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     topAdHtml: "",
     bottomAdHtml: ""
   });
+
+  const { t, language, setLanguage } = useI18n();
+
+  const toggleLanguage = () => {
+    const langs: Language[] = ['en', 'es', 'fr'];
+    const idx = langs.indexOf(language);
+    setLanguage(langs[(idx + 1) % langs.length]);
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('admin_settings');
@@ -82,7 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <button 
                 className={`flex items-center gap-1.5 font-bold transition-colors py-5 ${toolsMenuOpen ? 'text-red-600' : 'text-slate-600 dark:text-slate-300 hover:text-red-600'}`}
               >
-                PDF Tools
+                {t('nav.tools')}
                 <ChevronDown size={16} className={`transition-transform duration-300 ${toolsMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -104,7 +113,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               <div className="text-red-600 group-hover:scale-110 transition-transform">
                                 {getIcon(tool.icon, 18)}
                               </div>
-                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{tool.name}</span>
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{t(`tool.${tool.id}.name`, tool.name)}</span>
                             </Link>
                           ))}
                         </div>
@@ -115,12 +124,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               )}
             </div>
             
-            <Link to="/merge-pdf" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">Merge</Link>
-            <Link to="/compress-pdf" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">Compress</Link>
-            <Link to="/pdf-to-word" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">Convert</Link>
+            <Link to="/merge-pdf" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">{t('nav.merge')}</Link>
+            <Link to="/compress-pdf" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">{t('nav.compress')}</Link>
+            <Link to="/pdf-to-word" className="text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 font-bold transition-colors">{t('nav.convert')}</Link>
           </nav>
 
           <div className="flex items-center gap-3">
+            <button 
+              onClick={toggleLanguage}
+              className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center font-bold text-xs uppercase"
+              aria-label="Toggle Language"
+            >
+              <Globe size={18} className="mr-1" />
+              {language}
+            </button>
             <button 
               onClick={() => setDarkMode(!darkMode)}
               className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
@@ -137,7 +154,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex items-center gap-3">
                 <Link to="/dashboard" className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2 rounded-full font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-600">
                   <LayoutDashboard size={18} className="text-red-600" />
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
                 <div 
                   className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white font-black cursor-pointer shadow-lg hover:scale-105 transition-transform" 
@@ -149,9 +166,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link to="/login" className="hidden sm:block text-slate-600 dark:text-slate-300 font-bold hover:text-red-600 px-4">Login</Link>
+                <Link to="/login" className="hidden sm:block text-slate-600 dark:text-slate-300 font-bold hover:text-red-600 px-4">{t('nav.login')}</Link>
                 <Link to="/signup" className="hidden sm:flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full font-black shadow-lg hover:opacity-90 transition-all active:scale-95">
-                  Sign Up
+                  {t('nav.signup')}
                 </Link>
               </div>
             )}
@@ -208,7 +225,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="text-xl font-black dark:text-white">PDF Master</span>
               </div>
               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                The most advanced client-side PDF suite. Process documents privately and securely directly in your browser.
+                {t('footer.description')}
               </p>
             </div>
             {categories.slice(0, 3).map((category) => (
@@ -219,7 +236,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
                   {TOOLS.filter(t => t.category === category).slice(0, 4).map(tool => (
                     <li key={tool.id}>
-                      <Link to={tool.path} className="hover:text-red-600 transition-colors font-bold">{tool.name}</Link>
+                      <Link to={tool.path} className="hover:text-red-600 transition-colors font-bold">{t(`tool.${tool.id}.name`, tool.name)}</Link>
                     </li>
                   ))}
                 </ul>
