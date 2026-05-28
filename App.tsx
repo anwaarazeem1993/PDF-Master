@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Layout from './components/Layout.tsx';
 import Home from './pages/Home.tsx';
 import ToolPage from './pages/ToolPage.tsx';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
+        <Analytics />
       </Router>
     </AuthProvider>
   );
